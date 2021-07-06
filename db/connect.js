@@ -1,0 +1,37 @@
+// 一、连接模块
+
+// 1. 请求模块
+const mongoose = require('mongoose');
+
+mongoose.set('useFindAndModify',false)
+// Backstage 为 数据库名
+let DB_URL = 'mongodb://127.0.0.1:27017/surver';
+
+
+// 2. 连接数据库
+mongoose.connect(DB_URL,{
+	// mongodb 更新，需要补充的内容
+	useNewUrlParser:true, // 使用 新的 url解析方式
+	useUnifiedTopology:true, // 使用 拓扑 结构 去存储集合
+});
+
+
+
+// 3. 监听事件
+// connected 已 连接
+mongoose.connection.on('connected',function () {
+	console.log('连接成功端口:http://localhost:9999/');
+});
+
+// disconnected 已 断开连接
+mongoose.connection.on('disconnected',function () {
+	console.log('断开连接');
+});
+
+// error 连接错误
+mongoose.connection.on('error',function (err) {
+	console.log('连接错误',err);
+});
+
+
+module.exports = mongoose;
