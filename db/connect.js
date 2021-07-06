@@ -20,7 +20,7 @@ mongoose.connect(DB_URL,{
 // 3. 监听事件
 // connected 已 连接
 mongoose.connection.on('connected',function () {
-	console.log('连接成功端口:http://localhost:9999/');
+	console.log('连接成功端口:http://localhost:99/');
 });
 
 // disconnected 已 断开连接

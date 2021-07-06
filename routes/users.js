@@ -261,20 +261,24 @@ router.post('/getuserInfo', (req, resp, next) => {
   const token = req.headers.authorization
 
   if (token) {
-    db.findOne({ token }).then((res) => {
-      if (res) {
-        const userRole = res.userRole
+    db.findOne({ token },{userAccount:1,createTime:1}).then((userInfo) => {
+      if (userInfo) {
+       
+        const userRole = userInfo.userRole
         //查询当前用户拥有的角色
         roleDb.find({ _id: { $in: userRole } }).then((data) => {
           if (data) {
             let roleMenu = []
             roleMenu = data.map(v => v.roleMenuList).flat()
             //找到对应的 菜单
-            menuDb.find({ $or: [{ _id: { $in: roleMenu } }, { parentId: { $in: roleMenu } }] }).then(data => {
-              if (data) {
+            menuDb.find({ $or: [{ _id: { $in: roleMenu } }, { parentId: { $in: roleMenu } }] }).then(menuList => {
+              if (menuList) {
                 resp.jsonp({
                   code: 1,
-                  data,
+                  data:{
+                    menuList,
+                    userInfo,
+                  },
                   message: '操作成功'
                 })
               }

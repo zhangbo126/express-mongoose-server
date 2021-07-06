@@ -70,7 +70,7 @@
                 TokenDemo() {
                     axios({
                         method: 'POST',
-                        url: 'http://192.168.101.112:9999/users/addAccount',
+                        url: 'http://192.168.101.112:99/users/addAccount',
                         headers: {
                             authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi5rSZIiwiaWQiOiJmaGN5YTA1Z2R3MDAwMDAwIiwiaWF0IjoxNjI0OTUyNTUyLCJleHAiOjE2MjUzMTI1NTJ9.P0DlT2Fe-OS-8-1cy8irntCP-E3xG-J0qwUxFNC2j1U'
                         },
@@ -85,7 +85,7 @@
 
                             axios({
                                 method: 'post',
-                                url: 'http://192.168.101.112:9999/users/login',
+                                url: 'http://192.168.101.112:99/users/login',
                                 data: this.form,
 
                             }).then(res => {
