@@ -60,6 +60,7 @@ router.post('/addGetMenuTree', (req, res, next) => {
             // 判断是否为父级菜单
             if (item.parentId == parentId) {
                 item.children = []
+              
                 const child = item
                 // 迭代 list， 找到当前菜单相符合的所有子菜单
                 listToTree(list, child.children, item._id)
@@ -85,7 +86,7 @@ router.post('/editGetMenuTree', (req, res, next) => {
                 const menuIdList = data.roleMenuList
                 let list = JSON.parse(JSON.stringify(menu))
                 changeListTree(list, menuIdList)   // 根据ID 匹配已选择的 菜单 
-                let tree = [] 
+                let tree = []
                 listToTree(list, tree, null)
                 return res.jsonp({
                     code: 1,
@@ -194,6 +195,23 @@ router.post('/setStatus', (req, res, next) => {
         })
     })
 
+})
+
+
+/* 获取角色列表 */
+router.post('/getRoleList', (req, res, next) => {
+    const { pageSize, pageNumber } = req.body
+
+    db.find({}, { __v: 0 ,roleMenuList:0}, (err, data) => {
+       
+        return res.jsonp({
+            code: 1,
+            data,
+            count:data.length,
+            message: '操作成功'
+        })
+
+    }).limit(pageSize).skip(pageNumber)
 })
 
 

@@ -12,7 +12,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule
 
 router.post('/addMenu', (req, res, next) => {
 
-    const { name, status, icon, component, url, redirectUrl, sort, key, parentId, children } = req.body
+    const { name, icon, component, url, redirectUrl, sort, key, parentId, children } = req.body
 
     if (submitRule({ name, component, url, key })) {
         return res.jsonp({
@@ -21,7 +21,7 @@ router.post('/addMenu', (req, res, next) => {
         })
     }
 
-    if (reqRules({ name, status, component, url, sort, key }, 40) || ![0, 1].includes(status)) {
+    if (reqRules({ name, component, url, sort, key }, 40)) {
         return res.jsonp({
             code: 0,
             message: '异常'
@@ -30,7 +30,7 @@ router.post('/addMenu', (req, res, next) => {
 
 
     const obj = {
-        name, status, icon, component, url, redirectUrl, sort, key, parentId, children
+        name, status: 1, icon, component, url, redirectUrl, sort, key, parentId, children
     }
     //判断 菜单唯一标识 是否被占用
     db.findOne({ key }, (err, data) => {
@@ -201,7 +201,6 @@ router.post('/removeMenu', (req, res, next) => {
 router.post('/getMenuTree', (req, res, next) => {
     const { pageSize, pageNumber } = req.body
     db.find({}, { __v: 0 }, (err, data) => {
-
         const menu = data
         //树型结构数据处理
         const tree = []
@@ -232,6 +231,17 @@ router.post('/getMenuTree', (req, res, next) => {
     }
 })
 
+
+/*获取列表结构 菜单*/
+router.post('/getMenuList', (req, res, next) => {
+    db.find({}, { __v: 0 }, (err, data) => {
+        return res.jsonp({
+            code: 1,
+            data,
+            message: '操作成功'
+        })
+    })
+})
 
 
 module.exports = router;
