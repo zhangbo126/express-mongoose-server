@@ -79,7 +79,7 @@ router.post('/editMenu', (req, res, next) => {
         })
     }
 
-    if (reqRules({ name, status, component, url, redirectUrl, sort, key }, 40) || ![0, 1].includes(status)) {
+    if (reqRules({ name, component, url, redirectUrl, sort, key }, 40) ) {
         return res.jsonp({
             code: 0,
             message: '异常'
@@ -94,7 +94,9 @@ router.post('/editMenu', (req, res, next) => {
         parentId, id
     }
     //判断 菜单唯一标识 是否被占用
+
     db.findOne({ key }, (err, data) => {
+       
         if (err) {
             return res.jsonp({
                 code: 0,
@@ -117,8 +119,8 @@ router.post('/editMenu', (req, res, next) => {
                 })
             }
             return res.jsonp({
-                code: 0,
-                message: '异常'
+                code: 1,
+                message: '操作成功'
             })
         })
     })
@@ -210,7 +212,7 @@ router.post('/getMenuTree', (req, res, next) => {
             data: tree,
             message: '操作成功'
         })
-    }).limit(pageSize).skip(pageNumber)
+    }).skip(pageNumber).limit(pageSize)
 
     const listToTree = (list, tree, parentId) => {
         list.forEach(item => {

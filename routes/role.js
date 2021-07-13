@@ -60,7 +60,7 @@ router.post('/addGetMenuTree', (req, res, next) => {
             // 判断是否为父级菜单
             if (item.parentId == parentId) {
                 item.children = []
-              
+
                 const child = item
                 // 迭代 list， 找到当前菜单相符合的所有子菜单
                 listToTree(list, child.children, item._id)
@@ -80,12 +80,16 @@ router.post('/addGetMenuTree', (req, res, next) => {
 router.post('/editGetMenuTree', (req, res, next) => {
     const { id } = req.body
     //根据用户ID 找到 对应的菜单
-    db.findOne({ _id: id }).then((data) => {
+    db.findOne({ _id: id }, { _v: 0 }).then((data) => {
         if (data) {
-            dbMenu.find().then((menu) => {
-                const menuIdList = data.roleMenuList
+            dbMenu.find({}, { _v: 0 }).then((menu) => {
+                const menuIdList = data.roleMenuList.map(v => {
+                    v.isChange = 0
+                    return v
+                })
                 let list = JSON.parse(JSON.stringify(menu))
                 changeListTree(list, menuIdList)   // 根据ID 匹配已选择的 菜单 
+
                 let tree = []
                 listToTree(list, tree, null)
                 return res.jsonp({
@@ -107,9 +111,9 @@ router.post('/editGetMenuTree', (req, res, next) => {
                 // 迭代 list， 找到当前菜单相符合的所有子菜单
                 listToTree(list, child.children, item._id)
                 // 删掉不存在 children 值的属性
-                if (child.children.length <= 0) {
-                    delete child.children
-                }
+                // if (child.children.length <= 0) {
+                //     delete child.children
+                // }
                 // 加入到树中
                 tree.push(child)
             }
@@ -119,15 +123,23 @@ router.post('/editGetMenuTree', (req, res, next) => {
     //判断已选中的 菜单
     const changeListTree = (menu, menuIdList) => {
         //isChange 1 已选择  0 未选择
-        menuIdList.forEach(id => {
-            menu.forEach(v => {
-                v.isChange = 0
+        menu.forEach(v => {
+            menuIdList.forEach(id => {
                 if (v._id == id) {
                     v.isChange = 1
+                }
+                if (v.parentId == id) {
+                    menu = menu.map(v => {
+                        if (v.parentId == id) {
+                            v.isChange = 1
+                        }
+                        return v
+                    })
                 }
             })
         })
     }
+
 
 })
 
@@ -165,7 +177,26 @@ router.post('/editRole', (req, res, next) => {
 })
 
 
-/*角色停用/启用*/
+/*角色删除*/
+
+router.post('/removeRole', (req, res, next) => {
+
+    const { id } = req.body
+    db.findByIdAndRemove({ _id: id }, (err, data) => {
+        if (!err) {
+            return res.jsonp({
+                code: 1,
+                message: '操作成功'
+            })
+        }
+        return res.jsonp({
+            code: 0,
+            message: '参数不完整'
+        })
+    })
+
+})
+
 
 router.post('/setStatus', (req, res, next) => {
 
@@ -202,12 +233,12 @@ router.post('/setStatus', (req, res, next) => {
 router.post('/getRoleList', (req, res, next) => {
     const { pageSize, pageNumber } = req.body
 
-    db.find({}, { __v: 0 ,roleMenuList:0}, (err, data) => {
-       
+    db.find({}, { __v: 0, roleMenuList: 0 }, (err, data) => {
+
         return res.jsonp({
             code: 1,
             data,
-            count:data.length,
+            count: data.length,
             message: '操作成功'
         })
 
