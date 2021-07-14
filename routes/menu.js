@@ -212,7 +212,7 @@ router.post('/getMenuTree', (req, res, next) => {
             data: tree,
             message: '操作成功'
         })
-    }).skip(pageNumber).limit(pageSize)
+    }).skip(pageNumber-1).limit(pageSize)
 
     const listToTree = (list, tree, parentId) => {
         list.forEach(item => {

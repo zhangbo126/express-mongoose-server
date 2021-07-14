@@ -10,6 +10,7 @@ let schema = mongoose.Schema({
     "loginIp": String,
     "userInfo": Object,
     "userRole": Array,
+    "userRoleName": Array,
     "phone": String ,
     "email":String,
     "status":Number,

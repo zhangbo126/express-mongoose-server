@@ -242,7 +242,7 @@ router.post('/getRoleList', (req, res, next) => {
             message: '操作成功'
         })
 
-    }).limit(pageSize).skip(pageNumber)
+    }).limit(pageSize).skip(pageNumber-1)
 })
 
 

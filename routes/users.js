@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var silly = require('silly-datetime');
 let db = require('../db').userInfo
 let roleDb = require('../db').roleInfo  //角色表
 let menuDb = require('../db').menuInfo  //菜单表
@@ -89,6 +90,91 @@ router.post('/login', (req, res, next) => {
 })
 
 
+/*获取用户信息*/
+
+router.post('/getuserInfo', (req, resp, next) => {
+
+  const token = req.headers.authorization
+
+  if (token) {
+    db.findOne({ token }, { userAccount: 1, createTime: 1, _id: 0 }).then((userInfo) => {
+      if (userInfo) {
+
+        const userRole = userInfo.userRole
+        //查询当前用户拥有的角色
+        roleDb.find({ _id: { $in: userRole } }).then((data) => {
+          if (data) {
+            let roleMenu = []
+            console.log(data)
+            roleMenu = data.map(v => v.roleMenuList).flat()
+            //找到对应的 菜单
+            menuDb.find({ $or: [{ _id: { $in: roleMenu } }, { parentId: { $in: roleMenu } }] }).then(menuList => {
+              if (menuList.length > 0) {
+                resp.jsonp({
+                  code: 1,
+                  data: {
+                    menuList,
+                    userInfo,
+                  },
+                  message: '操作成功'
+                })
+              } else {
+                resp.jsonp({
+                  code: -1,
+                  data: {
+                    menuList,
+                    userInfo,
+                  },
+                  message: '操作成功'
+                })
+              }
+            })
+          }
+        })
+      }
+    })
+    return
+  }
+  resp.jsonp({
+    code: 0,
+    message: '异常'
+  })
+})
+
+
+
+
+
+/*获取账号列表*/
+
+router.post('/getAccountList', (req, res, next) => {
+  const { pageSize, pageNumber } = req.body
+  db.find({}, { __v: 0 }, (err, data) => {
+
+    if (err) {
+      return res.jsonp({
+        code: 0,
+        data,
+        message: '异常'
+      })
+    }
+
+
+    return res.jsonp({
+      code: 1,
+      data,
+      message: '操作成功'
+    })
+
+  })
+
+
+})
+
+
+
+
+
 /*
 添加账号
   POST
@@ -98,12 +184,13 @@ router.post('/login', (req, res, next) => {
 */
 
 router.post('/addAccount', (req, res, next) => {
-  const { userAccount, phone, email, userRole } = req.body
+  const { userAccount, phone, email } = req.body
   let obj = {
     userAccount,
     passWord: '123456',
-    createTime: new Date().toLocaleString(),
+    createTime: silly.format(new Date(), 'YYYY-MM-DD HH:mm:ss'),
     userRole: [],
+    userRoleName: [],
     phone,
     email,
     status: 1,
@@ -154,6 +241,26 @@ router.post('/addAccount', (req, res, next) => {
 
   })
 
+})
+
+/*
+   删除账户
+*/
+
+router.post('/delAccount', (req, res, next) => {
+  const { id } = req.body
+  db.findByIdAndRemove({ _id: id }, (err) => {
+    if (err) {
+      return res.jsonp({
+        code: 0,
+        message: '操作异常'
+      })
+    }
+    return res.jsonp({
+      code: 1,
+      message: '操作成功'
+    })
+  })
 })
 
 
@@ -236,68 +343,35 @@ router.post('/resultPassWord', (req, res, next) => {
 /* 角色分配*/
 router.post('/roleAssignment', (req, res, next) => {
   const { id, userRole } = req.body
-  db.findOneAndUpdate({ _id: id }, { userRole }, (err, data) => {
-    console.log(data)
-    if (!err) {
+
+  roleDb.find({ "_id": { $in: userRole } }, (err, data) => {
+    if (err) {
       return res.jsonp({
-        code: 1,
-        message: '操作成功'
+        code: 0,
+        message: '异常'
       })
     }
-    return res.jsonp({
-      code: 0,
-      message: '异常'
-    })
-  })
+    const userRoleName = data.map(v => v.name)
 
-
-})
-
-
-/*获取用户信息*/
-
-router.post('/getuserInfo', (req, resp, next) => {
-
-  const token = req.headers.authorization
-
-  if (token) {
-    db.findOne({ token }, { userAccount: 1, createTime: 1, _id: 0 }).then((userInfo) => {
-      if (userInfo) {
-
-        const userRole = userInfo.userRole
-        //查询当前用户拥有的角色
-        roleDb.find({ _id: { $in: userRole } }).then((data) => {
-          if (data) {
-            let roleMenu = []
-            roleMenu = data.map(v => v.roleMenuList).flat()
-            //找到对应的 菜单
-            menuDb.find({ $or: [{ _id: { $in: roleMenu } }, { parentId: { $in: roleMenu } }] }).then(menuList => {
-              if (menuList.length > 0) {
-                resp.jsonp({
-                  code: 1,
-                  data: {
-                    menuList,
-                    userInfo,
-                  },
-                  message: '操作成功'
-                })
-              } else {
-                resp.jsonp({
-                  code: -1,
-                  data: {
-                    menuList,
-                    userInfo,
-                  },
-                  message: '操作成功'
-                })
-              }
-            })
-          }
+    db.findOneAndUpdate({ _id: id }, { userRole, userRoleName }, (err, data) => {
+      if (!err) {
+        return res.jsonp({
+          code: 1,
+          message: '操作成功'
         })
       }
+
+      return res.jsonp({
+        code: 0,
+        message: '异常'
+      })
     })
-  }
+
+  })
+
 })
+
+
 
 
 /* POST */
