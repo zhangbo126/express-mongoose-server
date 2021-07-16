@@ -21,7 +21,7 @@
 1.  yarn
 2.  yarn serve
 3.  将vue.config.js 代理地址替换为express 后端控制台输出的地址
-4.![输入图片说明](https://images.gitee.com/uploads/images/2021/0716/112510_b6a3dcf2_5452088.png "屏幕截图.png")
+4. ![输入图片说明](https://images.gitee.com/uploads/images/2021/0716/112510_b6a3dcf2_5452088.png "屏幕截图.png")
 
 
 
