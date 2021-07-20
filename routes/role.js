@@ -128,14 +128,7 @@ router.post('/editGetMenuTree', (req, res, next) => {
                 if (v._id == id) {
                     v.isChange = 1
                 }
-                if (v.parentId == id) {
-                    menu = menu.map(v => {
-                        if (v.parentId == id) {
-                            v.isChange = 1
-                        }
-                        return v
-                    })
-                }
+
             })
         })
     }

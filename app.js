@@ -6,6 +6,7 @@ var logger = require('morgan');
 const bodyParser = require('body-parser')
 var expressJwt = require('express-jwt')
 let Token = require('./utils/tokenProving')
+let db = require('./db').userInfo
 let rouerModle = require('./routes')
 var app = express();
 
@@ -20,10 +21,18 @@ app.use(expressJwt({
 // error  handler   //token验证 全局拦截
 app.use(function (err, req, res, next) {
   let token = req.headers.authorization
-  let  isAuth =  Token.tokenRange(token)
-
+  let isAuth = Token.tokenRange(token)
   if (token && isAuth) {
-    next()
+    //全局验证 当前 token 是否有效
+    db.findOne({ token }).then(data => {
+      if (!data) {
+        res.status(403)
+        res.render('error')
+      } else {
+        next()
+      }
+    })
+
   } else {
     res.status(err.status)
     res.render('error')
@@ -32,7 +41,6 @@ app.use(function (err, req, res, next) {
 
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 

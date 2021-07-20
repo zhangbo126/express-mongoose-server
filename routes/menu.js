@@ -72,6 +72,7 @@ router.post('/addMenu', (req, res, next) => {
 router.post('/editMenu', (req, res, next) => {
 
     const { name, status, icon, component, url, redirectUrl, sort, key, parentId, children, id } = req.body
+
     if (submitRule({ name, component, url, key })) {
         return res.jsonp({
             code: 0,
@@ -79,7 +80,7 @@ router.post('/editMenu', (req, res, next) => {
         })
     }
 
-    if (reqRules({ name, component, url, redirectUrl, sort, key }, 40) ) {
+    if (reqRules({ name, component, url, redirectUrl, sort, key ,id}, 40) ) {
         return res.jsonp({
             code: 0,
             message: '异常'
@@ -104,7 +105,7 @@ router.post('/editMenu', (req, res, next) => {
             })
         }
 
-        if (data.id != id) {
+        if (data && data.id != id) {
             return res.jsonp({
                 code: 0,
                 message: '标识已被使用'

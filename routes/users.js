@@ -16,8 +16,8 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 
 用户登录
   POST
 */
-router.get('/',(req,res)=>{
-    return  res.send('ok')
+router.get('/', (req, res) => {
+  return res.send('ok')
 })
 
 router.post('/login', (req, res, next) => {
@@ -96,26 +96,27 @@ router.post('/login', (req, res, next) => {
 /*获取用户信息*/
 
 router.post('/getuserInfo', (req, resp, next) => {
-
   // const token = req.headers.authorization
   const token = req.headers.authorization
 
   if (token) {
-    db.findOne({ token }, { userRoleName:0,token:0,passWord:0, _id: 0 }).then((userInfo) => {
-  
+    db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 }).then((userInfo) => {
+
       if (userInfo) {
 
         const userRole = userInfo.userRole
-    
+
         //查询当前用户拥有的角色
         roleDb.find({ _id: { $in: userRole } }).then((data) => {
           if (data) {
             let roleMenu = []
-         
+
             roleMenu = data.map(v => v.roleMenuList).flat()
+
             //找到对应的 菜单
-            menuDb.find({ $or: [{ _id: { $in: roleMenu } }, { parentId: { $in: roleMenu } }] }).then(menuList => {
+            menuDb.find({ $or: [{ _id: { $in: roleMenu } }] }).then(menuList => {
               if (menuList.length > 0) {
+                //找到对应的父级菜单
                 resp.jsonp({
                   code: 1,
                   data: {
@@ -138,9 +139,9 @@ router.post('/getuserInfo', (req, resp, next) => {
           }
         })
       }
-    
+
     })
-      return
+    return
   }
   resp.jsonp({
     code: 0,
