@@ -275,6 +275,30 @@ router.post('/delAccount', (req, res, next) => {
 
 
 /*
+ 修改密码 原密码验证
+*/
+router.post('/editPasswordTesting', (req, res, next) => {
+
+  const token = req.headers.authorization
+  const passWord = md5Encry(req.body.passWord)
+
+  db.findOne({ token }).then(data => {
+    if (data && data.passWord == passWord) {
+      return res.jsonp({
+        code: 1,
+        message: '操作成功'
+      })
+    } else {
+      return res.jsonp({
+        code: 0,
+        message: '原密码不正确'
+      })
+    }
+  })
+
+})
+
+/*
 修改密码
 */
 router.post('/editPassword', (req, res, next) => {
@@ -333,7 +357,7 @@ router.post('/accountStatusSet', (req, res, next) => {
 
 router.post('/resultPassWord', (req, res, next) => {
   const { id } = req.body
-  const passWord = md5Encry('123456')
+  const passWord = md5Encry('zb123456')
   db.findOneAndUpdate({ _id: id }, { passWord }, (err, data) => {
     if (!err) {
       return res.jsonp({

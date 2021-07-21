@@ -10,13 +10,13 @@ let db = require('./db').userInfo
 let rouerModle = require('./routes')
 var app = express();
 
-app.use(expressJwt({
-  secret: 'mes_qdhd_mobile_xhykjyxgs',
-  algorithms: ['HS256']
+// app.use(expressJwt({
+//   secret: 'mes_qdhd_mobile_xhykjyxgs',
+//   algorithms: ['HS256']
 
-}).unless({
-  path: ['/users/login', '/']
-}))
+// }).unless({
+//   path: ['/users/login', '/']
+// }))
 
 // error  handler   //token验证 全局拦截
 app.use(function (err, req, res, next) {
