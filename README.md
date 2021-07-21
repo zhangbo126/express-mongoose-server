@@ -23,7 +23,12 @@
 3.  将vue.config.js 代理地址替换为express 后端控制台输出的地址
 4. ![输入图片说明](https://images.gitee.com/uploads/images/2021/0716/112510_b6a3dcf2_5452088.png "屏幕截图.png")
 
+5.前端调整：[https://gitee.com/ZHANG_6666/crm-template](https://gitee.com/ZHANG_6666/crm-template)
 
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0721/174827_67f8a206_5452088.png "屏幕截图.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0721/174859_24beb36c_5452088.png "屏幕截图.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0721/174928_9c11ed32_5452088.png "屏幕截图.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0721/174949_fa055b47_5452088.png "屏幕截图.png")
 
 
 
