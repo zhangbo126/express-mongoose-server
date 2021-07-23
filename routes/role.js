@@ -14,7 +14,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 
 router.post('/addRole', (req, res, next) => {
 
     const { name, describe, roleMenuList } = req.body
-    if (submitRule({ name, roleMenuList })) {
+    if (submitRule({ name, describe })) {
         return res.jsonp({
             code: 0,
             message: '参数不完整'
@@ -29,14 +29,19 @@ router.post('/addRole', (req, res, next) => {
     }
 
     const obj = { name, describe, status: 1, roleMenuList }
-    db.insertMany(obj, (err, data) => {
-        if (!err) {
-            return res.jsonp({
-                code: 1,
-                message: '操作成功'
-            })
-        }
+    dbMenu.find({ "_id": { $in: roleMenuList } }, (err, menuList) => {
+        obj.roleMenuNameList = menuList.map(v => v.name)
+        db.insertMany(obj, (err, data) => {
+            if (!err) {
+                return res.jsonp({
+                    code: 1,
+                    message: '操作成功'
+                })
+            }
+        })
     })
+
+
 })
 
 
@@ -141,7 +146,7 @@ router.post('/editGetMenuTree', (req, res, next) => {
 router.post('/editRole', (req, res, next) => {
 
     const { name, describe, roleMenuList, id } = req.body
-    if (submitRule({ name, roleMenuList, id })) {
+    if (submitRule({ name, describe, id })) {
         return res.jsonp({
             code: 0,
             message: '参数不完整'
@@ -155,25 +160,29 @@ router.post('/editRole', (req, res, next) => {
     }
 
     const obj = { name, describe, roleMenuList }
-    db.findOneAndUpdate({ _id: id }, obj, (err, data) => {
-        if (!err) {
+    dbMenu.find({ "_id": { $in: roleMenuList } }, (err, menuList) => {
+        obj.roleMenuNameList = menuList.map(v => v.name)
+        db.findOneAndUpdate({ _id: id }, obj, (err, data) => {
+            if (!err) {
+                return res.jsonp({
+                    code: 1,
+                    message: '操作成功'
+                })
+            }
             return res.jsonp({
-                code: 1,
-                message: '操作成功'
+                code: 0,
+                message: '异常'
             })
-        }
-        return res.jsonp({
-            code: 0,
-            message: '异常'
         })
+
     })
+
 })
 
 
 /*角色删除*/
 
 router.post('/removeRole', (req, res, next) => {
-
     const { id } = req.body
     db.findByIdAndRemove({ _id: id }, (err, data) => {
         if (!err) {
@@ -224,20 +233,33 @@ router.post('/setStatus', (req, res, next) => {
 
 /* 获取角色列表 */
 router.post('/getRoleList', (req, res, next) => {
-    const { pageSize, pageNumber } = req.body
+    const { pageSize, pageNumber, name, status } = req.body
+    let queryInfo = {
+        $or: []
+    }
 
-    db.find({}, { __v: 0, roleMenuList: 0 }, (err, data) => {
+    if (name) {
+        queryInfo.$or.push({ name: { $regex: new RegExp(name, 'i') } })
+    }
 
-        return res.jsonp({
-            code: 1,
-            data,
-            count: data.length,
-            message: '操作成功'
-        })
+    if (status) {
+        queryInfo.$or.push({ status })
+    }
+    queryInfo.$or.length==0? delete queryInfo.$or:''
 
-    }).limit(pageSize).skip(pageNumber-1)
+    db.count({}, (err, count) => {
+        db.find(queryInfo, { __v: 0, roleMenuList: 0 }, (err, data) => {
+            return res.jsonp({
+                code: 1,
+                data,
+                count,
+                message: '操作成功'
+            })
+
+        }).skip((pageNumber - 1) * 10).limit(pageSize)
+    })
+
 })
-
 
 
 

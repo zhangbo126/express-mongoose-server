@@ -4,7 +4,7 @@ let schema = mongoose.Schema({
     "describe": String,
     "status": Number,
     "roleMenuList": Array,
-    
+    "roleMenuNameList": Array
 
 })
 

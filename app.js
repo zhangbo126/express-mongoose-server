@@ -13,13 +13,18 @@ var app = express();
 // app.use(expressJwt({
 //   secret: 'mes_qdhd_mobile_xhykjyxgs',
 //   algorithms: ['HS256']
-
 // }).unless({
 //   path: ['/users/login', '/']
 // }))
 
 // error  handler   //token验证 全局拦截
 app.use(function (err, req, res, next) {
+  if (err) {
+    return res.json({
+      code: 0,
+      message: '异常'
+    })
+  }
   let token = req.headers.authorization
   let isAuth = Token.tokenRange(token)
   if (token && isAuth) {
