@@ -238,15 +238,7 @@ router.post('/getRoleList', (req, res, next) => {
         $or: []
     }
 
-    if (name) {
-        queryInfo.$or.push({ name: { $regex: new RegExp(name, 'i') } })
-    }
-
-    if (status) {
-        queryInfo.$or.push({ status })
-    }
-    queryInfo.$or.length==0? delete queryInfo.$or:''
-
+    queryHandle({ name, status }, queryInfo)
     db.count({}, (err, count) => {
         db.find(queryInfo, { __v: 0, roleMenuList: 0 }, (err, data) => {
             return res.jsonp({
@@ -261,7 +253,25 @@ router.post('/getRoleList', (req, res, next) => {
 
 })
 
-
+function queryHandle(queryInfo, query) {
+    for (let i in queryInfo) {
+        if (queryInfo[i] != null) {
+            if (i == 'name') {
+                const obj = {
+                    [i]: { $regex: new RegExp(queryInfo[i], 'i') }
+                }
+                return query.$or.push(obj)
+            }
+            const obj = {
+                [i]: queryInfo[i]
+            }
+            query.$or.push(obj)
+        }
+    }
+    if (query.$or.length == 0) {
+        delete query.$or
+    }
+}
 
 
 module.exports = router;
