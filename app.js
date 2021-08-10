@@ -54,10 +54,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '.')));
 
 app.use('/users', rouerModle.users);
 app.use('/menu', rouerModle.menu);
 app.use('/role', rouerModle.role);
+app.use('/goods', rouerModle.goods);
+app.use('/goodsClass', rouerModle.goodsClass);
+app.use('/upload', rouerModle.upload);
+app.use('/brandBrand', rouerModle.goodsBrand);
 
 
 module.exports = app;

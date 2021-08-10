@@ -1,7 +1,8 @@
 //获取本机IP
 
 let getIpUrl= require('../utils/getIpAddress')
-
+let express = require('express');
+let app = express();
 // 1. 请求模块
 const mongoose = require('mongoose');
 
@@ -22,6 +23,8 @@ mongoose.connect(DB_URL, {
 mongoose.connection.on('connected', function () {
 	console.log(`连接成功请求端口:http://${getIpUrl()}:99`);
 });
+
+
 
 // disconnected 已 断开连接
 mongoose.connection.on('disconnected', function () {

@@ -80,7 +80,7 @@ router.post('/editMenu', (req, res, next) => {
         })
     }
 
-    if (reqRules({ name, component, url, redirectUrl, sort, key ,id}, 40) ) {
+    if (reqRules({ name, component, url, redirectUrl, sort, key, id }, 40)) {
         return res.jsonp({
             code: 0,
             message: '异常'
@@ -97,7 +97,7 @@ router.post('/editMenu', (req, res, next) => {
     //判断 菜单唯一标识 是否被占用
 
     db.findOne({ key }, (err, data) => {
-       
+
         if (err) {
             return res.jsonp({
                 code: 0,
@@ -213,7 +213,7 @@ router.post('/getMenuTree', (req, res, next) => {
             data: tree,
             message: '操作成功'
         })
-    }).skip(pageNumber-1).limit(pageSize)
+    }).skip(pageNumber - 1).limit(pageSize)
 
     const listToTree = (list, tree, parentId) => {
         list.forEach(item => {
@@ -237,6 +237,9 @@ router.post('/getMenuTree', (req, res, next) => {
 
 /*获取列表结构 菜单*/
 router.post('/getMenuList', (req, res, next) => {
+ 
+    
+   
     db.find({}, { __v: 0 }, (err, data) => {
         return res.jsonp({
             code: 1,
@@ -245,6 +248,28 @@ router.post('/getMenuList', (req, res, next) => {
         })
     })
 })
+
+
+//查询参数数据处理
+function queryHandle(queryInfo, query) {
+    for (let i in queryInfo) {
+        if (queryInfo[i] != null) {
+            if (i == 'name') {
+                const obj = {
+                    [i]: { $regex: new RegExp(queryInfo[i], 'i') }
+                }
+                return query.$or.push(obj)
+            }
+            const obj = {
+                [i]: queryInfo[i]
+            }
+            query.$or.push(obj)
+        }
+    }
+    if (query.$or.length == 0) {
+        delete query.$or
+    }
+}
 
 
 module.exports = router;

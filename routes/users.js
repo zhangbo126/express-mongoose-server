@@ -150,30 +150,54 @@ router.post('/getuserInfo', (req, resp, next) => {
 /*获取账号列表*/
 
 router.post('/getAccountList', (req, res, next) => {
-  const { pageSize, pageNumber } = req.body
-  db.find({}, { __v: 0 }, (err, data) => {
+  const { pageSize, pageNumber, userAccount, phone, status, email } = req.body
+  let queryInfo = {
+    $or: []
+  }
 
-    if (err) {
+  queryHandle({ userAccount, status, phone, email }, queryInfo)
+  db.count({}, (err, count) => {
+    db.find(queryInfo, { __v: 0 }, (err, data) => {
+      if (err) {
+        return res.jsonp({
+          code: 0,
+          message: '异常'
+        })
+      }
+
       return res.jsonp({
-        code: 0,
+        code: 1,
         data,
-        message: '异常'
+        count,
+        message: '操作成功'
       })
-    }
-
-    return res.jsonp({
-      code: 1,
-      data,
-      message: '操作成功'
-    })
-
-  }).limit(pageSize).skip(pageNumber)
+    }).skip((pageNumber - 1) * 10).limit(pageSize)
+  })
 
 
 })
 
 
-
+//查询参数数据处理
+function queryHandle(queryInfo, query) {
+  for (let i in queryInfo) {
+    if (queryInfo[i] != null) {
+      if (i == 'userAccount' || i == "phone" || i == 'email') {
+        const obj = {
+          [i]: { $regex: new RegExp(queryInfo[i]) }
+        }
+        return query.$or.push(obj)
+      }
+      const obj = {
+        [i]: queryInfo[i]
+      }
+      query.$or.push(obj)
+    }
+  }
+  if (query.$or.length == 0) {
+    delete query.$or
+  }
+}
 
 
 /*

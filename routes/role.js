@@ -2,8 +2,6 @@ var express = require('express');
 var router = express.Router();
 let db = require('../db').roleInfo
 let dbMenu = require('../db').menuInfo
-
-
 let reqRules = require('../utils/reqDataRule').reqMultipleRule   //请求内容长度验证
 let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 验证
 
@@ -253,6 +251,8 @@ router.post('/getRoleList', (req, res, next) => {
 
 })
 
+
+//查询参数数据处理
 function queryHandle(queryInfo, query) {
     for (let i in queryInfo) {
         if (queryInfo[i] != null) {
