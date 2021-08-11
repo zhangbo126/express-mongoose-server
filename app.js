@@ -60,9 +60,9 @@ app.use('/users', rouerModle.users);
 app.use('/menu', rouerModle.menu);
 app.use('/role', rouerModle.role);
 app.use('/goods', rouerModle.goods);
-app.use('/goodsClass', rouerModle.goodsClass);
+app.use('/class', rouerModle.goodsClass);
 app.use('/upload', rouerModle.upload);
-app.use('/brandBrand', rouerModle.goodsBrand);
+app.use('/brand', rouerModle.goodsBrand);
 
 
 module.exports = app;

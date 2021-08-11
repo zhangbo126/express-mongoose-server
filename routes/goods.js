@@ -8,8 +8,8 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule
 
 
 router.post('/addGoods', (req, res, next) => {
-    
-    
+
+
 
 })
 
