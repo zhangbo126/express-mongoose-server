@@ -6,7 +6,7 @@ let schema = mongoose.Schema({
     "partentId": String,
     "partentName":String,
     "sort":Number,
-    "_id":String,
+   
     
     
 })

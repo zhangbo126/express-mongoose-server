@@ -85,26 +85,22 @@ router.post('/editClass', (req, res, next) => {
         })
     }
 
- 
+
 
     db.findOne({ partentId: _id }).then(data => {
         //判断当前编辑分类下是否有子分类
-
         if (data && partentId) {
             return res.jsonp({
                 code: 0,
                 message: '当前分类下已有子分类'
             })
         }
-    
+
         db.findOne({ _id: partentId }).then(partentData => {
             const partent = partentData || {}
-       
             const obj = {
                 name, logoFilePath, status, partentId, sort, _id, partentName: partent.name || null
             }
-            console.log(obj)
-
             db.updateOne({ _id }, obj, (err, data) => {
                 if (err) {
                     return res.jsonp({
@@ -121,9 +117,6 @@ router.post('/editClass', (req, res, next) => {
 
         })
     })
-
-
-
 
 })
 
