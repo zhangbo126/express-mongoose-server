@@ -131,7 +131,7 @@ router.post('/getBrandList', (req, res, next) => {
                 count,
                 message: '操作成功'
             })
-        }).skip((pageNumber - 1) * 10).limit(pageSize)
+        }).skip((pageNumber - 1) * 10).limit(pageSize).sort({'sort':1})
     })
 
 })
