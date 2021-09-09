@@ -6,8 +6,8 @@ let schema = mongoose.Schema({
     "categoryId": String,
     "categoryName": String,
     "status": Number,    // 1待完善 2 在售   3下架  
-    "mixId": String,
-    "mixName": String, //规格名称
+    "goodsId": String,
+    "skuName": String, //sku名称
     "designSketch": Array, //商品效果图
     "price": Number, //商品价格
     "mixLength": Number,
@@ -15,6 +15,10 @@ let schema = mongoose.Schema({
     "mixHeight": Number,
     "goodsDetail": String,
     "goodsNo": String,
+    "specValue1": String,
+    "specValue2": String,
+    "specValue3": String,
+    "specValue4": String,
 })
 
 //goodsInfoList 集合名称
