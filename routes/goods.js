@@ -45,6 +45,7 @@ router.post('/addGoods', (req, res, next) => {
       delete v.mixKey3
       delete v.mixKey4
       v.categoryId = categoryId
+      v.status = 1
       v.brandName = brandName
       v.categoryName = categoryName
       v.brandId = brandId
@@ -91,25 +92,92 @@ router.post('/addGoods', (req, res, next) => {
 })
 
 
+//编辑商品
+router.post('/editGoods', (req, res, next) => {
+
+  const { mixList, spaceValueList } = req.body
+  const { categoryId, brandId, goodsNo, goodsName, goodsId } = req.body.mixInfo
+
+  if (submitRule({ mixList, spaceValueList, categoryId, brandId, goodsNo, goodsName, goodsId })) {
+    return res.jsonp({
+      code: 0,
+      message: '参数不完整'
+    })
+  }
+
+  let brandName, categoryName
+  //根据id找到对应的品牌 和分类 名称
+  dbBrand.findById({ _id: brandId }).then(data => {
+    brandName = data.name
+
+  }).then(() => {
+    dbClass.findById({ _id: categoryId }).then(data => {
+      categoryName = data.name
+
+    }).then(() => {
+      editFun()
+    })
+  })
+
+
+  const editFun = () => {
+    let goodsList = mixList.map(v => {
+      delete v.mixKey1
+      delete v.mixKey2
+      delete v.mixKey3
+      delete v.mixKey4
+      v.categoryId = categoryId
+      v.status = 1
+      v.brandName = brandName
+      v.categoryName = categoryName
+      v.brandId = brandId
+      v.goodsNo = goodsNo
+      v.goodsName = goodsName
+      v.designSketch = v.designSketch.map(d => d.url)
+      v.goodsId = goodsId
+      return v
+    })
+
+    const goodsInfo = {
+      goodsName,
+      categoryName,
+      brandName,
+      categoryId,
+      brandId,
+      goodsNo,
+      goodsId,
+      spaceValueList
+    }
+
+    dbSpace.updateOne({ goodsId }, goodsInfo).then(data => {
+
+    }).then(() => {
+      db.updateMany({ goodsId }, { "$set": goodsList }).then(data => {
+        console.log(data)
+      })
+    })
+  }
+
+})
+
 
 
 //编辑时获取当前商品信息
 
 router.post('/getEditGoodsInfo', (req, res, next) => {
-
   const { goodsId } = req.body
   let mixList = []
-  let spaceList = []
+  let spaceInfo = {}
   db.find({ goodsId }).then(data => {
     mixList = data
   }).then(() => {
-    dbSpace.find({ goodsId }).then(data => {
-      spaceList = data
+    dbSpace.findOne({ goodsId }).then(data => {
+      spaceInfo = data
       return res.jsonp({
         code: 1,
         message: '操作成功',
         data: {
-          spaceList,
+          spaceInfo,
           mixList,
         }
       })
@@ -123,18 +191,19 @@ router.post('/getEditGoodsInfo', (req, res, next) => {
 //获取商品列表
 router.post('/getGoodsList', (req, res, next) => {
 
-  const { pageSize, pageNumber, goodsName, brandName, categoryName, skuName } = req.body
+  const { pageSize, pageNumber, goodsName, brandName, categoryName, skuName, goodsNo } = req.body
   let queryInfo = {
     $or: []
   }
 
-  queryHandle({ goodsName, categoryName, brandName, skuName }, queryInfo)
+  queryHandle({ goodsName, categoryName, brandName, skuName, goodsNo }, queryInfo)
+
   db.count({}, (err, count) => {
     db.find(queryInfo, { __v: 0 }, (err, data) => {
       return res.jsonp({
         code: 1,
         data,
-        count,
+        count: queryInfo.$or ? data.length : count,
         message: '操作成功'
       })
     }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
@@ -150,7 +219,7 @@ function queryHandle(queryInfo, query) {
   for (let i in queryInfo) {
     if (queryInfo[i] != null) {
       //判断需要正则验证的 参数
-      if (i == 'goodsName') {
+      if (i == 'goodsName' || i == 'brandName' || i == 'categoryName' || i == 'goodsNo' || i == 'skuName') {
         const obj = {
           [i]: { $regex: new RegExp(queryInfo[i], 'i') }
         }

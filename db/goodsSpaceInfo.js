@@ -8,6 +8,7 @@ let schema = mongoose.Schema({
     "status": Number,    // 1待完善 2 在售   3下架  
     "goodsId": String,
     "goodsDetail": String,
+    "goodsNo":String,
     "spaceValueList":Array,//规格列
 })
 
