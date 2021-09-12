@@ -134,7 +134,7 @@ router.post('/editGoods', (req, res, next) => {
       v.goodsNo = goodsNo
       v.goodsName = goodsName
       v.designSketch = v.designSketch.map(d => d.url)
-      v.goodsId = goodsId
+
       return v
     })
 
@@ -152,9 +152,24 @@ router.post('/editGoods', (req, res, next) => {
     dbSpace.updateOne({ goodsId }, goodsInfo).then(data => {
 
     }).then(() => {
-      db.updateMany({ goodsId }, { "$set": goodsList }).then(data => {
-        console.log(data)
+      db.deleteMany({ goodsId }, (err, data) => {
+        if (!err) {
+          db.insertMany(goodsList, (errs, data) => {
+            if (errs) {
+              return res.jsonp({
+                code: 0,
+                message: '异常'
+              })
+            }
+            return res.jsonp({
+              code: 1,
+              message: '操作成功'
+            })
+          })
+        }
       })
+
+
     })
   }
 
