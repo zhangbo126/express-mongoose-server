@@ -21,6 +21,7 @@
     "node-uuid": "^1.4.8",
     "os": "^0.1.2",
     "pug": "2.0.0-beta11",
-    "silly-datetime": "^0.1.2"
+    "silly-datetime": "^0.1.2",
+    "ueditor": "^1.2.3"
   }
 }

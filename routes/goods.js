@@ -176,7 +176,6 @@ router.post('/editGoods', (req, res, next) => {
 })
 
 
-
 //编辑时获取当前商品信息
 
 router.post('/getEditGoodsInfo', (req, res, next) => {
@@ -226,6 +225,43 @@ router.post('/getGoodsList', (req, res, next) => {
 
 })
 
+
+//设置商品详情
+router.post('/setGoodsDetails', (req, res, next) => {
+  const { goodsId, mixDetail } = req.body
+  if (submitRule({ goodsId, mixDetail })) {
+    return res.jsonp({
+      code: 0,
+      message: '参数不完整'
+    })
+  }
+
+  db.findOneAndUpdate({ goodsId }, { mixDetail }).then(data => {
+    return res.jsonp({
+      code: 1,
+      message: '操作成功'
+    })
+  })
+})
+
+//获取商品详情
+router.post('/getGoodsDetails', (req, res, next) => {
+  const { goodsId } = req.body
+  if (submitRule({ goodsId })) {
+    return res.jsonp({
+      code: 0,
+      message: '参数不完整'
+    })
+  }
+
+  db.findOneAndUpdate({ goodsId }).then(data => {
+    return res.jsonp({
+      code: 1,
+      message: '操作成功',
+      data
+    })
+  })
+})
 
 
 

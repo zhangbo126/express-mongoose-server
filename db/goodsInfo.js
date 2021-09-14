@@ -19,6 +19,7 @@ let schema = mongoose.Schema({
     "specValue2": String,
     "specValue3": String,
     "specValue4": String,
+    'mixDetail': String,
 })
 
 //goodsInfoList 集合名称

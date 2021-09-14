@@ -8,6 +8,7 @@ var expressJwt = require('express-jwt')
 let Token = require('./utils/tokenProving')
 let db = require('./db').userInfo
 let rouerModle = require('./routes')
+
 var app = express();
 
 // app.use(expressJwt({
@@ -18,6 +19,15 @@ var app = express();
 // }))
 
 // error  handler   //token验证 全局拦截
+
+app.all('*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Request-Headers', '*');
+  res.header('Content-Type', 'application/json;charset=utf-8');
+  next();
+});
 app.use(function (err, req, res, next) {
   if (err) {
     return res.json({
@@ -44,18 +54,18 @@ app.use(function (err, req, res, next) {
   }
 });
 
+
+
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, '.')));
-
 app.use('/users', rouerModle.users);
 app.use('/menu', rouerModle.menu);
 app.use('/role', rouerModle.role);
