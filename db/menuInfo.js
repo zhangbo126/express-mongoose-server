@@ -1,4 +1,4 @@
-const mongoose = require('./connect')
+ const mongoose = require('./connect')
 let schema = mongoose.Schema({
     "name": String,
     "status": Number,

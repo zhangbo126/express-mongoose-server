@@ -3,8 +3,8 @@ let schema = mongoose.Schema({
     "name": String,
     "describe": String,
     "status": Number,
-    "roleMenuList": Array,
-    "roleMenuNameList": Array
+    "roleMenu_List": Array,
+    "roleMenuName_List": Array
 
 })
 

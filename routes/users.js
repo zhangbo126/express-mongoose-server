@@ -99,16 +99,19 @@ router.post('/getuserInfo', (req, resp, next) => {
 
   if (token) {
     db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 }).then((userInfo) => {
-
+     
       if (userInfo) {
         const userRole = userInfo.userRole
+  
+     
         //查询当前用户拥有的角色
-        roleDb.find({ _id: { $in: userRole } }).then((data) => {
+        roleDb.find({ "_id": { $in: userRole } }).then((data) => {
           if (data) {
             let roleMenu = []
-            roleMenu = data.map(v => v.roleMenuList).flat()
+            roleMenu = data.map(v => v.roleMenu_List).flat()
+           
             //找到对应的 菜单
-            menuDb.find({ $or: [{ _id: { $in: roleMenu } }] }).then(menuList => {
+            menuDb.find({ $or: [{ "_id": { $in: roleMenu } }] }).then(menuList => {
               if (menuList.length > 0) {
                 //找到对应的父级菜单
                 resp.jsonp({

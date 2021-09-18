@@ -12,6 +12,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 
 router.post('/addRole', (req, res, next) => {
 
     const { name, describe, roleMenuList } = req.body
+    console.log(req.body)
     if (submitRule({ name, describe })) {
         return res.jsonp({
             code: 0,
@@ -27,8 +28,9 @@ router.post('/addRole', (req, res, next) => {
     }
 
     const obj = { name, describe, status: 1, roleMenuList }
+   
     dbMenu.find({ "_id": { $in: roleMenuList } }, (err, menuList) => {
-        obj.roleMenuNameList = menuList.map(v => v.name)
+        obj.roleMenuName_List = menuList.map(v => v.name)
         db.insertMany(obj, (err, data) => {
             if (!err) {
                 return res.jsonp({
@@ -159,7 +161,7 @@ router.post('/editRole', (req, res, next) => {
 
     const obj = { name, describe, roleMenuList }
     dbMenu.find({ "_id": { $in: roleMenuList } }, (err, menuList) => {
-        obj.roleMenuNameList = menuList.map(v => v.name)
+        obj.roleMenuName_List = menuList.map(v => v.name)
         db.findOneAndUpdate({ _id: id }, obj, (err, data) => {
             if (!err) {
                 return res.jsonp({
