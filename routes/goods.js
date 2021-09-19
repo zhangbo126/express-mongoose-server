@@ -228,15 +228,15 @@ router.post('/getGoodsList', (req, res, next) => {
 
 //设置商品详情
 router.post('/setGoodsDetails', (req, res, next) => {
-  const { goodsId, mixDetail } = req.body
-  if (submitRule({ goodsId, mixDetail })) {
+  const { id, mixDetail } = req.body
+  if (submitRule({ id, mixDetail })) {
     return res.jsonp({
       code: 0,
       message: '参数不完整'
     })
   }
 
-  db.findOneAndUpdate({ goodsId }, { mixDetail }).then(data => {
+  db.findOneAndUpdate({ _id:id }, { mixDetail }).then(data => {
     return res.jsonp({
       code: 1,
       message: '操作成功'
@@ -246,15 +246,15 @@ router.post('/setGoodsDetails', (req, res, next) => {
 
 //获取商品详情
 router.post('/getGoodsDetails', (req, res, next) => {
-  const { goodsId } = req.body
-  if (submitRule({ goodsId })) {
+  const { id } = req.body
+  if (submitRule({ id })) {
     return res.jsonp({
       code: 0,
       message: '参数不完整'
     })
   }
 
-  db.findOneAndUpdate({ goodsId }).then(data => {
+  db.findOne({ _id:id }).then(data => {
     return res.jsonp({
       code: 1,
       message: '操作成功',

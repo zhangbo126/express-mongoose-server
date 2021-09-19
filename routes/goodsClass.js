@@ -158,7 +158,7 @@ router.post('/getClassList', (req, res, next) => {
             return res.jsonp({
                 code: 1,
                 data,
-                count:queryInfo.$or?data.length:count,
+                count: queryInfo.$or ? data.length : count,
                 message: '操作成功'
             })
         }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
