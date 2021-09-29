@@ -11,7 +11,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 
 
 router.post('/addRole', (req, res, next) => {
 
-    const { name, describe, roleMenuList } = req.body
+    const { name, describe, roleMenu_List } = req.body
     console.log(req.body)
     if (submitRule({ name, describe })) {
         return res.jsonp({
@@ -27,9 +27,9 @@ router.post('/addRole', (req, res, next) => {
         })
     }
 
-    const obj = { name, describe, status: 1, roleMenuList }
+    const obj = { name, describe, status: 1, roleMenu_List }
    
-    dbMenu.find({ "_id": { $in: roleMenuList } }, (err, menuList) => {
+    dbMenu.find({ "_id": { $in: roleMenu_List } }, (err, menuList) => {
         obj.roleMenuName_List = menuList.map(v => v.name)
         db.insertMany(obj, (err, data) => {
             if (!err) {
@@ -87,8 +87,9 @@ router.post('/editGetMenuTree', (req, res, next) => {
     //根据用户ID 找到 对应的菜单
     db.findOne({ _id: id }, { _v: 0 }).then((data) => {
         if (data) {
+           
             dbMenu.find({}, { _v: 0 }).then((menu) => {
-                const menuIdList = data.roleMenuList.map(v => {
+                const menuIdList = data.roleMenu_List.map(v => {
                     v.isChange = 0
                     return v
                 })
@@ -145,7 +146,7 @@ router.post('/editGetMenuTree', (req, res, next) => {
 /*编辑角色*/
 router.post('/editRole', (req, res, next) => {
 
-    const { name, describe, roleMenuList, id } = req.body
+    const { name, describe, roleMenu_List, id } = req.body
     if (submitRule({ name, describe, id })) {
         return res.jsonp({
             code: 0,
@@ -159,8 +160,8 @@ router.post('/editRole', (req, res, next) => {
         })
     }
 
-    const obj = { name, describe, roleMenuList }
-    dbMenu.find({ "_id": { $in: roleMenuList } }, (err, menuList) => {
+    const obj = { name, describe, roleMenu_List }
+    dbMenu.find({ "_id": { $in: roleMenu_List } }, (err, menuList) => {
         obj.roleMenuName_List = menuList.map(v => v.name)
         db.findOneAndUpdate({ _id: id }, obj, (err, data) => {
             if (!err) {
@@ -240,7 +241,7 @@ router.post('/getRoleList', (req, res, next) => {
 
     queryHandle({ name, status }, queryInfo)
     db.count({}, (err, count) => {
-        db.find(queryInfo, { __v: 0, roleMenuList: 0 }, (err, data) => {
+        db.find(queryInfo, { __v: 0, roleMenu_List: 0 }, (err, data) => {
             return res.jsonp({
                 code: 1,
                 data,
