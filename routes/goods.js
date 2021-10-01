@@ -236,7 +236,7 @@ router.post('/setGoodsDetails', (req, res, next) => {
     })
   }
 
-  db.findOneAndUpdate({ _id:id }, { mixDetail }).then(data => {
+  db.findOneAndUpdate({ _id: id }, { mixDetail }).then(data => {
     return res.jsonp({
       code: 1,
       message: '操作成功'
@@ -254,7 +254,7 @@ router.post('/getGoodsDetails', (req, res, next) => {
     })
   }
 
-  db.findOne({ _id:id }).then(data => {
+  db.findOne({ _id: id }).then(data => {
     return res.jsonp({
       code: 1,
       message: '操作成功',
@@ -263,6 +263,26 @@ router.post('/getGoodsDetails', (req, res, next) => {
   })
 })
 
+//小程序获取商品详情信息
+
+router.post('/getGoodsDetailsInfo', (req, res, next) => {
+  const { id } = req.body
+  if (submitRule({ id })) {
+    return res.jsonp({
+      code: 0,
+      message: '参数不完整'
+    })
+  }
+
+  db.findOne({ _id: id }).then(data => {
+    return res.jsonp({
+      code: 1,
+      message: '操作成功',
+      data
+    })
+  })
+
+})
 
 
 //查询参数数据处理
