@@ -13,8 +13,10 @@
 1.  npm i
 2.  npm start
 3. 将请求接口换成控制台输出地址
+
 4.![输入图片说明](https://images.gitee.com/uploads/images/2021/0716/111807_c2945dc1_5452088.png "屏幕截图.png")
-5.数据导入:建议使用dbData下js文件js脚本导入（json格式导入数据格式会改变）
+
+5. 数据导入:建议使用dbData下js文件js脚本导入（json格式导入数据格式会改变）
 
 #### 安装教程 前端
 
