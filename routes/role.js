@@ -12,7 +12,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 
 router.post('/addRole', (req, res, next) => {
 
     const { name, describe, roleMenu_List } = req.body
-    console.log(req.body)
+  
     if (submitRule({ name, describe })) {
         return res.jsonp({
             code: 0,

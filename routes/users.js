@@ -1,6 +1,6 @@
-var express = require('express');
-var router = express.Router();
-var silly = require('silly-datetime');
+let express = require('express');
+let router = express.Router();
+let silly = require('silly-datetime');
 let db = require('../db').userInfo
 let roleDb = require('../db').roleInfo  //角色表
 let menuDb = require('../db').menuInfo  //菜单表
@@ -63,19 +63,19 @@ router.post('/login', (req, res, next) => {
         }, {
           phone: userAccount
         }]
-      }, { token }, (err, data) => {
+      }, { token }, (err, userInfo) => {
         if (err) {
           return res.jsonp({
             code: 0,
             message: '异常'
           })
         }
+        data.token=token
         return res.jsonp({
           code: 1,
           message: '登陆成功',
-          data: {
-            token
-          }
+          data,
+         
         })
       })
       return
@@ -91,6 +91,10 @@ router.post('/login', (req, res, next) => {
 })
 
 
+
+
+
+
 /*获取用户信息*/
 
 router.post('/getuserInfo', (req, resp, next) => {
@@ -99,17 +103,17 @@ router.post('/getuserInfo', (req, resp, next) => {
 
   if (token) {
     db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 }).then((userInfo) => {
-     
+
       if (userInfo) {
         const userRole = userInfo.userRole
-  
-     
+
+
         //查询当前用户拥有的角色
         roleDb.find({ "_id": { $in: userRole } }).then((data) => {
           if (data) {
             let roleMenu = []
             roleMenu = data.map(v => v.roleMenu_List).flat()
-           
+
             //找到对应的 菜单
             menuDb.find({ $or: [{ "_id": { $in: roleMenu } }] }).then(menuList => {
               if (menuList.length > 0) {
@@ -221,6 +225,7 @@ router.post('/addAccount', (req, res, next) => {
     userRoleName: [],
     phone,
     email,
+    userType: 1,
     status: 1,
   }
 
@@ -290,8 +295,6 @@ router.post('/delAccount', (req, res, next) => {
     })
   })
 })
-
-
 
 
 /*
@@ -426,64 +429,54 @@ router.post('/roleAssignment', (req, res, next) => {
 
 
 
-/* POST */
-router.post('/reqbody', function (req, res, next) {
+/*小程序用户注册*/
 
-  let arr = []
-  for (let i = 0; i < 10; i++) {
-    arr.push({
-      new_price: Math.floor(Math.random() * 1000),
-      sort: i + 1,
+router.post('/registerAccount', (req, res, next) => {
+
+  const { userAccount, phone, passWord } = req.body
+  let obj = {
+    userAccount,
+    passWord: md5Encry(passWord),
+    createTime: silly.format(new Date(), 'YYYY-MM-DD HH:mm:ss'),
+    userRole: [],
+    userRoleName: [],
+    phone,
+    email: null,
+    userType: 2,
+    status: 1,
+  }
+
+  if (submitRule({ userAccount, phone, passWord }) || reqRules({ userAccount, phone }, 40)) {
+    return res.jsonp({
+      code: 0,
+      message: '操作异常'
     })
   }
-  // console.log(req.header)
 
-  res.jsonp({
-    data: req.headers
+  db.findOne({ $or: [{ userAccount, phone }] }).then(data => {
+    if (data) {
+      return res.jsonp({
+        code: 0,
+        message: '该账号已被注册'
+      })
+    }
+    db.insertMany(obj, (err, data) => {
+      if (err) {
+        return res.jsonp({
+          code: 0,
+          message: '异常'
+        })
+      }
+      return res.jsonp({
+        code: 1,
+        message: '添加成功'
+      })
+    })
+
   })
-  // db.insertMany(arr)
 
 
-
-  // db.aggregate([
-  //   {
-  //     $lookup: {
-  //       from: "shopList",
-  //       localField: "_id",
-  //       foreignField: "shop_id",
-  //       as: 'shopInfo'
-  //     }
-  //   }, {
-  //     $project: {
-  //       _id: 0,
-  //       shopInfo: {
-  //         _id: 0
-  //       }
-  //     },
-  //   },
-  //   // {
-  //   //   $match:{
-  //   //     "new_price":{$gte:490}
-  //   //   }
-  //   // },
-  //   // {
-  //   //   $sort: {
-  //   //     "sort": -1
-  //   //   }
-  //   // },
-  //   // {
-  //   //   $limit:2
-  //   // }
-
-  // ], (err, data) => {
-  //   res.jsonp({
-  //     data
-  //   })
-  // })
-
-
-});
-
+})
 
 
 

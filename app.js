@@ -29,6 +29,7 @@ app.all('*', function (req, res, next) {
   next();
 });
 app.use(function (err, req, res, next) {
+ 
   if (err) {
     return res.json({
       code: 0,
@@ -73,6 +74,9 @@ app.use('/goods', rouerModle.goods);
 app.use('/class', rouerModle.goodsClass);
 app.use('/upload', rouerModle.upload);
 app.use('/brand', rouerModle.goodsBrand);
+app.use('/information', rouerModle.information);
+app.use('/cart', rouerModle.cart);
+app.use('/order', rouerModle.order);
 
 
 module.exports = app;

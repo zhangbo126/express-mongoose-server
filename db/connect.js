@@ -8,12 +8,13 @@ const mongoose = require('mongoose');
 
 mongoose.set('useFindAndModify', false)
 // Backstage 为 数据库名
-let DB_URL = 'mongodb://127.0.0.1:27017/surver';
+let DB_URL = 'mongodb://127.0.0.1:27017/database_1';
 // 2. 连接数据库
 mongoose.connect(DB_URL, {
 	// mongodb 更新，需要补充的内容
 	useNewUrlParser: true, // 使用 新的 url解析方式
 	useUnifiedTopology: true, // 使用 拓扑 结构 去存储集合
+	useCreateIndex:true,
 });
 
 

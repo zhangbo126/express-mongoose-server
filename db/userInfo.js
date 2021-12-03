@@ -14,7 +14,7 @@ let schema = mongoose.Schema({
     "phone": String ,
     "email":String,
     "status":Number,
-
+    "userType":Number  //用户类型 1 管理端  2 小程序
 })
 
 

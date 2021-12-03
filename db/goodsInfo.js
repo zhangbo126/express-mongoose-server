@@ -5,14 +5,13 @@ let schema = mongoose.Schema({
     "brandName": String,
     "categoryId": String,
     "categoryName": String,
+    "placeOrigin":String,
     "status": Number,    // 1待完善 2 在售   3下架  
     "goodsId": String,
     "skuName": String, //sku名称
     "designSketch": Array, //商品效果图
     "price": Number, //商品价格
-    "mixLength": Number,
-    "mixWidth": Number,
-    "mixHeight": Number,
+    "weight": Number, //商品重量
     "goodsDetail": String,
     "goodsNo": String,
     "specValue1": String,
@@ -20,6 +19,8 @@ let schema = mongoose.Schema({
     "specValue3": String,
     "specValue4": String,
     'mixDetail': String,
+    "goodsType":Number, //商品类型  1普通 2 秒杀 3 团购
+    "salesVolume":Number
 })
 
 //goodsInfoList 集合名称

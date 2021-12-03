@@ -1,8 +1,11 @@
 var express = require('express');
 var router = express.Router();
 let db = require('../db').classInfoList
+let dbGoods = require('../db').goodsInfo
+
 let reqRules = require('../utils/reqDataRule').reqMultipleRule
 let submitRule = require('../utils/reqDataRule').reqSubmitRule
+let replaceImgUrl = require('../utils/imgUrl')
 
 
 
@@ -86,7 +89,6 @@ router.post('/editClass', (req, res, next) => {
     }
 
 
-
     db.findOne({ partentId: _id }).then(data => {
         //判断当前编辑分类下是否有子分类
         if (data && partentId) {
@@ -152,19 +154,27 @@ router.post('/getClassList', (req, res, next) => {
     }
 
     queryHandle({ name, status, partentName }, queryInfo)
-    db.count({}, (err, count) => {
+
+    db.count(queryInfo, (err, count) => {
 
         db.find(queryInfo, { __v: 0 }, (err, data) => {
+            let resData = data.map(v => {
+                v.logoFilePath = replaceImgUrl(v.logoFilePath)
+                return v
+            })
             return res.jsonp({
                 code: 1,
-                data,
-                count: queryInfo.$or ? data.length : count,
+                data: resData,
+                count,
                 message: '操作成功'
             })
         }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
-    })
+    }).count(true)
 
 })
+
+
+
 
 /*获取父级分类*/
 router.post('/getPartentClass', (req, res, next) => {
@@ -181,12 +191,79 @@ router.post('/getPartentClass', (req, res, next) => {
 })
 
 
+/*小程序获取分类 层级*/
+
+router.post('/getClassTree', (req, res, next) => {
+
+
+    db.find({}, { __v: 0 }, (err, data) => {
+        const tree = []
+        const menu = data
+        listToTree(menu, tree, null)
+
+        return res.jsonp({
+            code: 1,
+            data: tree,
+            message: '操作成功'
+        })
+    })
+    const listToTree = (list, tree, partentId) => {
+        list.forEach(item => {
+            // 判断是否为父级菜单
+
+            if (item.partentId == partentId) {
+                item.children = []
+                const child = item
+                // 迭代 list， 找到当前菜单相符合的所有子菜单
+                listToTree(list, child.children, item._id)
+                // 删掉不存在 children 值的属性
+                if (child.children.length <= 0) {
+                    delete child.children
+                }
+                const children = child.children
+                let result = JSON.parse(JSON.stringify(child))
+                result.children = children
+                result.logoFilePath = replaceImgUrl(result.logoFilePath)
+                // 加入到树中
+                tree.push(result)
+            }
+        })
+
+    }
+
+})
+
+
+/*小程序根据类型获取分类列表*/
+router.post('/getClassTypeList', (req, res, next) => {
+
+    const { price, categoryId, salesVolume } = req.body
+    db.find({ partentId: categoryId }).then(ids => {
+        //找到当前分类下的子分类
+        const categoryIds = ids.map(v => v._id)
+        dbGoods.find({ "categoryId": { $in: categoryIds } }, { __v: 0 }, (err, data) => {
+            let resData = data
+            resData.forEach(v => {
+                v.designSketch = v.designSketch.map(url => {
+                    return url = replaceImgUrl(url)
+                })
+            })
+            return res.jsonp({
+                code: 1,
+                data: resData,
+                message: '操作成功'
+            })
+        }).sort({ price, salesVolume })
+    })
+
+})
+
 //查询参数数据处理
 function queryHandle(queryInfo, query) {
     for (let i in queryInfo) {
         if (queryInfo[i] != null) {
             //判断需要正则验证的 参数
-            if (i == 'name' || i == 'partentName') {
+            if (["name", "partentName"].includes(i)) {
                 const obj = {
                     [i]: { $regex: new RegExp(queryInfo[i], 'i') }
                 }

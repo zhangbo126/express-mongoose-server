@@ -6,6 +6,9 @@ let goods = require('./goods')
 let goodsClass = require('./goodsClass')
 let goodsBrand = require('./goodsBrand')
 let upload = require('./upload')
+let information=require('./information')
+let cart =require('./cart')
+let order = require('./order')
 module.exports = {
     users,
     menu,
@@ -13,5 +16,8 @@ module.exports = {
     goods,
     goodsClass,
     goodsBrand,
-    upload
+    upload,
+    information,
+    cart,
+    order
 };

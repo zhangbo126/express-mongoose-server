@@ -6,7 +6,7 @@ let dbBrand = require('../db').brandInfoList
 let dbClass = require('../db').classInfoList
 let reqRules = require('../utils/reqDataRule').reqMultipleRule
 let submitRule = require('../utils/reqDataRule').reqSubmitRule
-
+let replaceImgUrl = require('../utils/imgUrl')
 var uuid = require('node-uuid');
 
 
@@ -14,7 +14,7 @@ var uuid = require('node-uuid');
 router.post('/addGoods', (req, res, next) => {
   const goodsId = uuid.v4().replace(/-/g, "")
   const { mixList, spaceValueList } = req.body
-  const { categoryId, brandId, goodsNo, goodsName } = req.body.mixInfo
+  const { categoryId, brandId, goodsNo, goodsName, placeOrigin } = req.body.mixInfo
 
   if (submitRule({ mixList, spaceValueList, categoryId, brandId, goodsNo, goodsName })) {
     return res.jsonp({
@@ -51,13 +51,16 @@ router.post('/addGoods', (req, res, next) => {
       v.brandId = brandId
       v.goodsNo = goodsNo
       v.goodsName = goodsName
+      v.placeOrigin = placeOrigin
       v.designSketch = v.designSketch.map(d => d.url)
       v.goodsId = goodsId
+      v.salesVolume = Math.floor(Math.random() * 100)
       return v
     })
 
     const goodsInfo = {
       goodsName,
+      placeOrigin,
       categoryName,
       brandName,
       categoryId,
@@ -96,7 +99,7 @@ router.post('/addGoods', (req, res, next) => {
 router.post('/editGoods', (req, res, next) => {
 
   const { mixList, spaceValueList } = req.body
-  const { categoryId, brandId, goodsNo, goodsName, goodsId } = req.body.mixInfo
+  const { categoryId, brandId, goodsNo, goodsName, goodsId, placeOrigin } = req.body.mixInfo
 
   if (submitRule({ mixList, spaceValueList, categoryId, brandId, goodsNo, goodsName, goodsId })) {
     return res.jsonp({
@@ -133,7 +136,10 @@ router.post('/editGoods', (req, res, next) => {
       v.brandId = brandId
       v.goodsNo = goodsNo
       v.goodsName = goodsName
+      v.placeOrigin = placeOrigin
       v.designSketch = v.designSketch.map(d => d.url)
+      v.goodsId = goodsId
+      v.salesVolume = Math.floor(Math.random() * 100)
 
       return v
     })
@@ -146,8 +152,11 @@ router.post('/editGoods', (req, res, next) => {
       brandId,
       goodsNo,
       goodsId,
+      placeOrigin,
       spaceValueList
     }
+
+
 
     dbSpace.updateOne({ goodsId }, goodsInfo).then(data => {
 
@@ -205,25 +214,29 @@ router.post('/getEditGoodsInfo', (req, res, next) => {
 //获取商品列表
 router.post('/getGoodsList', (req, res, next) => {
 
-  const { pageSize, pageNumber, goodsName, brandName, categoryName, skuName, goodsNo } = req.body
+  const { pageSize, pageNumber, goodsName, brandName, categoryName, skuName, goodsNo, placeOrigin, goodsType } = req.body
   let queryInfo = {
     $or: []
   }
 
-  queryHandle({ goodsName, categoryName, brandName, skuName, goodsNo }, queryInfo)
+  queryHandle({ goodsName, categoryName, brandName, skuName, goodsNo, placeOrigin, goodsType }, queryInfo)
 
-  db.count({}, (err, count) => {
+  db.find(queryInfo, (err, count) => {
     db.find(queryInfo, { __v: 0 }, (err, data) => {
+      let resData = data
       return res.jsonp({
         code: 1,
-        data,
-        count: queryInfo.$or ? data.length : count,
+        data: resData,
+        count,
         message: '操作成功'
       })
     }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
-  })
+  }).count(true)
 
 })
+
+
+
 
 
 //设置商品详情
@@ -255,6 +268,10 @@ router.post('/getGoodsDetails', (req, res, next) => {
   }
 
   db.findOne({ _id: id }).then(data => {
+    data.designSketch = data.designSketch.map(v => {
+      
+      return v = replaceImgUrl(v)
+    })
     return res.jsonp({
       code: 1,
       message: '操作成功',
@@ -275,6 +292,8 @@ router.post('/getGoodsDetailsInfo', (req, res, next) => {
   }
 
   db.findOne({ _id: id }).then(data => {
+
+     
     return res.jsonp({
       code: 1,
       message: '操作成功',
@@ -285,12 +304,40 @@ router.post('/getGoodsDetailsInfo', (req, res, next) => {
 })
 
 
+//小程序获取商品列表 类型  
+router.post('/getGoodsTypeList', (req, res, next) => {
+  const { goodsType, pageSize, pageNumber } = req.body
+  let queryInfo = {
+    $or: []
+  }
+
+  queryHandle({ goodsType }, queryInfo)
+
+  db.count({}, (err, count) => {
+    db.find(queryInfo, { __v: 0 }, (err, data) => {
+        
+      return res.jsonp({
+        code: 1,
+        data,
+        message: '操作成功'
+      })
+    }).skip((pageNumber - 1) * 10).limit(pageSize)
+  })
+
+})
+
+
+
+
+
+
+
 //查询参数数据处理
 function queryHandle(queryInfo, query) {
   for (let i in queryInfo) {
     if (queryInfo[i] != null) {
       //判断需要正则验证的 参数
-      if (i == 'goodsName' || i == 'brandName' || i == 'categoryName' || i == 'goodsNo' || i == 'skuName') {
+      if (["goodsName", "placeOrigin", "brandName", "categoryName", "goodsNo", "skuName"].includes(i)) {
         const obj = {
           [i]: { $regex: new RegExp(queryInfo[i], 'i') }
         }

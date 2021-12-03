@@ -3,7 +3,7 @@ var router = express.Router();
 let db = require('../db').brandInfoList
 let reqRules = require('../utils/reqDataRule').reqMultipleRule
 let submitRule = require('../utils/reqDataRule').reqSubmitRule
-
+let replaceImgUrl = require('../utils/imgUrl')
 
 
 /*
@@ -123,16 +123,21 @@ router.post('/getBrandList', (req, res, next) => {
     }
 
     queryHandle({ name, status, partentName }, queryInfo)
-    db.count({}, (err, count) => {
+    db.count(queryInfo, (err, count) => {
         db.find(queryInfo, { __v: 0 }, (err, data) => {
+            let resData = data.map(v => {
+                v.logoFilePath = replaceImgUrl(v.logoFilePath)
+                
+                return v
+            })
             return res.jsonp({
                 code: 1,
-                data,
-                count:queryInfo.$or?data.length:count,
+                data: resData,
+                count,
                 message: '操作成功'
             })
-        }).skip((pageNumber - 1) * 10).limit(pageSize).sort({'sort':1})
-    })
+        }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
+    }).count(true)
 
 })
 

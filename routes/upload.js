@@ -27,12 +27,14 @@ let upload = multer({ storage })
 //单个上传
 router.post('/image', upload.single("file"), (req, res, next) => {
 
-    const path = `http://${getIpUrl()}:99/` + req.file.path.replace(/\\/g, '/')
+    // const path = `http://${getIpUrl()}:99/` + req.file.path.replace(/\\/g, '/')
+    const path = req.file.path.replace(/\\/g, '/')
+
     return res.jsonp({
         code: 1,
         message: '操作成功',
         data: {
-            path
+            path:`http://localhost:99/` + req.file.path.replace(/\\/g, '/')
         }
     })
 })
@@ -55,7 +57,7 @@ router.post('/batchimage', upload.array('file', 20), (req, res, next) => {
 
     const data = req.files.map(v => {
         let file = {
-            path: `http://${getIpUrl()}:99/` + v.path.replace(/\\/g, '/')
+            path: `http://localhost:99/` +v.path.replace(/\\/g, '/')
         }
         return file
 

@@ -6,6 +6,9 @@ let goodsInfo = require('./goodsInfo')
 let goodsSpaceInfo = require('./goodsSpaceInfo')
 let classInfoList = require('./goodsClass')
 let brandInfoList = require('./goodsBrand')
+let informationInfo = require('./informationInfo')
+let cartInfo = require('./cartInfo')
+let orderInfo = require('./orderInfo')
 
 module.exports = {
 	userInfo,
@@ -14,5 +17,8 @@ module.exports = {
 	goodsInfo,
 	goodsSpaceInfo,
 	classInfoList,
-	brandInfoList
+	brandInfoList,
+	informationInfo,
+	cartInfo,
+	orderInfo
 };
