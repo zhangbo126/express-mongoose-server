@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 mongoose.set('useFindAndModify', false)
 // Backstage 为 数据库名
-let DB_URL = 'mongodb://127.0.0.1:27017/database_1';
+let DB_URL = 'mongodb://127.0.0.1:27017/ZB_DATA';
 // 2. 连接数据库
 mongoose.connect(DB_URL, {
 	// mongodb 更新，需要补充的内容
