@@ -4,166 +4,196 @@ let db = require('../db').roleInfo
 let dbMenu = require('../db').menuInfo
 let reqRules = require('../utils/reqDataRule').reqMultipleRule   //请求内容长度验证
 let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 验证
-
-
+let queryInfoHandle = require('../utils/queryInfoHandle')
+//需要添加正则验证的参数
+const regexQueryKeyList = ["name"]
 
 /*新增角色*/
-
 router.post('/addRole', (req, res, next) => {
+    try {
+        const { name, describe, roleMenu_List } = req.body
+        if (submitRule({ name, describe })) {
+            return res.jsonp({
+                code: 0,
+                message: '参数不完整'
+            })
 
-    const { name, describe, roleMenu_List } = req.body
-  
-    if (submitRule({ name, describe })) {
-        return res.jsonp({
-            code: 0,
-            message: '参数不完整'
+        }
+        if (reqRules({ name, describe }, 40)) {
+            return res.jsonp({
+                code: 0,
+                message: '异常'
+            })
+        }
+
+        const obj = { name, describe, status: 1, roleMenu_List }
+
+        dbMenu.find({ "_id": { $in: roleMenu_List } }, (err, menuList) => {
+            obj.roleMenuName_List = menuList.map(v => v.name)
+            db.insertMany(obj, (err, data) => {
+                if (!err) {
+                    return res.jsonp({
+                        code: 1,
+                        message: '操作成功'
+                    })
+                }
+            })
         })
-
+    } catch {
+        next({ message: '接口错误' })
     }
-    if (reqRules({ name, describe }, 40)) {
-        return res.jsonp({
-            code: 0,
-            message: '异常'
-        })
-    }
-
-    const obj = { name, describe, status: 1, roleMenu_List }
-   
-    dbMenu.find({ "_id": { $in: roleMenu_List } }, (err, menuList) => {
-        obj.roleMenuName_List = menuList.map(v => v.name)
-        db.insertMany(obj, (err, data) => {
-            if (!err) {
-                return res.jsonp({
-                    code: 1,
-                    message: '操作成功'
-                })
-            }
-        })
-    })
-
-
 })
 
 
 /*新增获取菜单树形结构*/
 router.post('/addGetMenuTree', (req, res, next) => {
-    dbMenu.find({}, { __v: 0 }, (err, data) => {
-
-        const menu = data
-        //树型结构数据处理
-        const tree = []
-        listToTree(menu, tree, null)
-        return res.jsonp({
-            code: 1,
-            data: tree,
-            message: '操作成功'
+    try {
+        dbMenu.find({}, { __v: 0 }, (err, data) => {
+            const menu = data
+            //树型结构数据处理
+            const tree = []
+            listToTree(menu, tree, null)
+            return res.jsonp({
+                code: 1,
+                data: tree,
+                message: '操作成功'
+            })
         })
-    })
 
-    const listToTree = (list, tree, parentId) => {
-        list.forEach(item => {
-            // 判断是否为父级菜单
-            if (item.parentId == parentId) {
-                item.children = []
+        const listToTree = (list, tree, parentId) => {
+            list.forEach(item => {
+                // 判断是否为父级菜单
+                if (item.parentId == parentId) {
+                    item.children = []
 
-                const child = item
-                // 迭代 list， 找到当前菜单相符合的所有子菜单
-                listToTree(list, child.children, item._id)
-                // 删掉不存在 children 值的属性
-                if (child.children.length <= 0) {
-                    delete child.children
+                    const child = item
+                    // 迭代 list， 找到当前菜单相符合的所有子菜单
+                    listToTree(list, child.children, item._id)
+                    // 删掉不存在 children 值的属性
+                    if (child.children.length <= 0) {
+                        delete child.children
+                    }
+                    // 加入到树中
+                    tree.push(child)
                 }
-                // 加入到树中
-                tree.push(child)
-            }
-        })
+            })
+        }
+    } catch {
+        next({ message: '接口错误' })
     }
 })
 
 /*编辑时获取菜单树形结构*/
 
 router.post('/editGetMenuTree', (req, res, next) => {
-    const { id } = req.body
-    //根据用户ID 找到 对应的菜单
-    db.findOne({ _id: id }, { _v: 0 }).then((data) => {
-        if (data) {
-           
-            dbMenu.find({}, { _v: 0 }).then((menu) => {
-                const menuIdList = data.roleMenu_List.map(v => {
-                    v.isChange = 0
-                    return v
+    try {
+        const { id } = req.body
+        //根据用户ID 找到 对应的菜单
+        db.findOne({ _id: id }, { _v: 0 }).then((data) => {
+            if (data) {
+
+                dbMenu.find({}, { _v: 0 }).then((menu) => {
+                    const menuIdList = data.roleMenu_List.map(v => {
+                        v.isChange = 0
+                        return v
+                    })
+                    let list = JSON.parse(JSON.stringify(menu))
+                    changeListTree(list, menuIdList)   // 根据ID 匹配已选择的 菜单 
+
+                    let tree = []
+                    listToTree(list, tree, null)
+                    return res.jsonp({
+                        code: 1,
+                        data: tree,
+                        message: '操作成功'
+                    })
                 })
-                let list = JSON.parse(JSON.stringify(menu))
-                changeListTree(list, menuIdList)   // 根据ID 匹配已选择的 菜单 
 
-                let tree = []
-                listToTree(list, tree, null)
-                return res.jsonp({
-                    code: 1,
-                    data: tree,
-                    message: '操作成功'
-                })
-            })
-
-        }
-    })
-
-    const listToTree = (list, tree, parentId) => {
-        list.forEach(item => {
-            // 判断是否为父级菜单
-            if (item.parentId == parentId) {
-                item.children = []
-                let child = item
-                // 迭代 list， 找到当前菜单相符合的所有子菜单
-                listToTree(list, child.children, item._id)
-                // 删掉不存在 children 值的属性
-                // if (child.children.length <= 0) {
-                //     delete child.children
-                // }
-                // 加入到树中
-                tree.push(child)
             }
         })
-    }
 
-    //判断已选中的 菜单
-    const changeListTree = (menu, menuIdList) => {
-        //isChange 1 已选择  0 未选择
-        menu.forEach(v => {
-            menuIdList.forEach(id => {
-                if (v._id == id) {
-                    v.isChange = 1
+        const listToTree = (list, tree, parentId) => {
+            list.forEach(item => {
+                // 判断是否为父级菜单
+                if (item.parentId == parentId) {
+                    item.children = []
+                    let child = item
+                    // 迭代 list， 找到当前菜单相符合的所有子菜单
+                    listToTree(list, child.children, item._id)
+                    // 删掉不存在 children 值的属性
+                    // if (child.children.length <= 0) {
+                    //     delete child.children
+                    // }
+                    // 加入到树中
+                    tree.push(child)
                 }
-
             })
-        })
+        }
+
+        //判断已选中的 菜单
+        const changeListTree = (menu, menuIdList) => {
+            //isChange 1 已选择  0 未选择
+            menu.forEach(v => {
+                menuIdList.forEach(id => {
+                    if (v._id == id) {
+                        v.isChange = 1
+                    }
+
+                })
+            })
+        }
+    } catch {
+        next({ message: '接口错误' })
     }
-
-
 })
 
 
 /*编辑角色*/
 router.post('/editRole', (req, res, next) => {
+    try {
+        const { name, describe, roleMenu_List, id } = req.body
+        if (submitRule({ name, describe, id })) {
+            return res.jsonp({
+                code: 0,
+                message: '参数不完整'
+            })
+        }
+        if (reqRules({ name, describe }, 40)) {
+            return res.jsonp({
+                code: 0,
+                message: '异常'
+            })
+        }
 
-    const { name, describe, roleMenu_List, id } = req.body
-    if (submitRule({ name, describe, id })) {
-        return res.jsonp({
-            code: 0,
-            message: '参数不完整'
-        })
-    }
-    if (reqRules({ name, describe }, 40)) {
-        return res.jsonp({
-            code: 0,
-            message: '异常'
-        })
-    }
+        const obj = { name, describe, roleMenu_List }
+        dbMenu.find({ "_id": { $in: roleMenu_List } }, (err, menuList) => {
+            obj.roleMenuName_List = menuList.map(v => v.name)
+            db.findOneAndUpdate({ _id: id }, obj, (err, data) => {
+                if (!err) {
+                    return res.jsonp({
+                        code: 1,
+                        message: '操作成功'
+                    })
+                }
+                return res.jsonp({
+                    code: 0,
+                    message: '异常'
+                })
+            })
 
-    const obj = { name, describe, roleMenu_List }
-    dbMenu.find({ "_id": { $in: roleMenu_List } }, (err, menuList) => {
-        obj.roleMenuName_List = menuList.map(v => v.name)
-        db.findOneAndUpdate({ _id: id }, obj, (err, data) => {
+        })
+    } catch {
+        next({ message: '接口错误' })
+    }
+})
+
+
+/*角色删除*/
+
+router.post('/removeRole', (req, res, next) => {
+    try {
+        const { id } = req.body
+        db.findByIdAndRemove({ _id: id }, (err, data) => {
             if (!err) {
                 return res.jsonp({
                     code: 1,
@@ -172,109 +202,72 @@ router.post('/editRole', (req, res, next) => {
             }
             return res.jsonp({
                 code: 0,
-                message: '异常'
+                message: '参数不完整'
             })
         })
-
-    })
-
-})
-
-
-/*角色删除*/
-
-router.post('/removeRole', (req, res, next) => {
-    const { id } = req.body
-    db.findByIdAndRemove({ _id: id }, (err, data) => {
-        if (!err) {
-            return res.jsonp({
-                code: 1,
-                message: '操作成功'
-            })
-        }
-        return res.jsonp({
-            code: 0,
-            message: '参数不完整'
-        })
-    })
-
+    } catch {
+        next({ message: '接口错误' })
+    }
 })
 
 
 router.post('/setStatus', (req, res, next) => {
-
-    const { status, id } = req.body
-    if (submitRule({ status })) {
-        return res.jsonp({
-            code: 0,
-            message: '参数不完整'
-        })
-    }
-    if (![0, 1].includes(status)) {
-        return res.jsonp({
-            code: 0,
-            message: '状态值设置不正确'
-        })
-    }
-    db.findOneAndUpdate({ _id: id }, { status }, (err, data) => {
-        if (!err) {
+    try {
+        const { status, id } = req.body
+        if (submitRule({ status })) {
             return res.jsonp({
-                code: 1,
-                message: '操作成功'
+                code: 0,
+                message: '参数不完整'
             })
         }
-        return res.jsonp({
-            code: 0,
-            message: '参数不完整'
+        if (![0, 1].includes(status)) {
+            return res.jsonp({
+                code: 0,
+                message: '状态值设置不正确'
+            })
+        }
+        db.findOneAndUpdate({ _id: id }, { status }, (err, data) => {
+            if (!err) {
+                return res.jsonp({
+                    code: 1,
+                    message: '操作成功'
+                })
+            }
+            return res.jsonp({
+                code: 0,
+                message: '参数不完整'
+            })
         })
-    })
-
+    } catch {
+        next({ message: '接口错误' })
+    }
 })
 
 
 /* 获取角色列表 */
 router.post('/getRoleList', (req, res, next) => {
-    const { pageSize, pageNumber, name, status } = req.body
-    let queryInfo = {
-        $or: []
+    try {
+        const { pageSize, pageNumber, name, status } = req.body
+        let queryInfo = {
+            $or: []
+        }
+        const queryMap = { name, status }
+        queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
+        db.count({}, (err, count) => {
+            db.find(queryInfo, { __v: 0, roleMenu_List: 0 }, (err, data) => {
+                return res.jsonp({
+                    code: 1,
+                    data,
+                    count: queryInfo.$or ? data.length : count,
+                    message: '操作成功'
+                })
+
+            }).skip((pageNumber - 1) * 10).limit(pageSize)
+        })
+    } catch {
+        next({ message: '接口错误' })
     }
-
-    queryHandle({ name, status }, queryInfo)
-    db.count({}, (err, count) => {
-        db.find(queryInfo, { __v: 0, roleMenu_List: 0 }, (err, data) => {
-            return res.jsonp({
-                code: 1,
-                data,
-                count: queryInfo.$or ? data.length : count,
-                message: '操作成功'
-            })
-
-        }).skip((pageNumber - 1) * 10).limit(pageSize)
-    })
 
 })
-
-
-//查询参数数据处理
-function queryHandle(queryInfo, query) {
-    for (let i in queryInfo) {
-        if (queryInfo[i] != null) {
-            if (i == 'name') {
-                const obj = {
-                    [i]: { $regex: new RegExp(queryInfo[i], 'i') }
-                }
-                return query.$or.push(obj)
-            }
-            const obj = {
-                [i]: queryInfo[i]
-            }
-            query.$or.push(obj)
-        }
-    }
-    if (query.$or.length == 0) {
-        delete query.$or
-    }
-}
-
 
 module.exports = router;

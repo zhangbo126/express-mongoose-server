@@ -16,7 +16,6 @@ let storage = multer.diskStorage({
         let filenameArr = file.originalname.split('.');
         let mimetypename = filenameArr[filenameArr.length - 1];
         filename = timestamp + '.' + mimetypename;
-
         cb(null, filename)
     }
 
@@ -26,15 +25,12 @@ let upload = multer({ storage })
 
 //单个上传
 router.post('/image', upload.single("file"), (req, res, next) => {
-
-    // const path = `http://${getIpUrl()}:99/` + req.file.path.replace(/\\/g, '/')
     const path = req.file.path.replace(/\\/g, '/')
-
     return res.jsonp({
         code: 1,
         message: '操作成功',
         data: {
-            path:`http://localhost:99/` + req.file.path.replace(/\\/g, '/')
+            path: `http://localhost:99/` + req.file.path.replace(/\\/g, '/')
         }
     })
 })
@@ -48,27 +44,30 @@ router.get('/imageEuditor', (req, res, next) => {
         code: 1,
         message: '操作成功',
     })
-
 })
 
 
 //批量上传接口
 router.post('/batchimage', upload.array('file', 20), (req, res, next) => {
 
-    const data = req.files.map(v => {
-        let file = {
-            path: `http://localhost:99/` +v.path.replace(/\\/g, '/')
-        }
-        return file
+    try {
+        const data = req.files.map(v => {
+            let file = {
+                path: `http://localhost:99/` + v.path.replace(/\\/g, '/')
+            }
+            return file
+        })
 
-    })
+        return res.jsonp({
+            code: 1,
+            message: '操作成功',
+            data
+        })
 
-    return res.jsonp({
-        code: 1,
-        message: '操作成功',
-        data
-    })
+    } catch {
+        next({ message: '接口错误' })
 
+    }
 })
 
 module.exports = router;

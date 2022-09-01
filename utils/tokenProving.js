@@ -1,18 +1,20 @@
 
 let jwt = require('jsonwebtoken');
+/** 
+ * token 有效验证
+ *
+ * @param {String} token token
+ * @return false | true
+ */
 
-
-//token 有效验证
 const tokenRange = (token) => {
     let secretOrPrivateKey = "mes_qdhd_mobile_xhykjyxgs";
     return jwt.verify(token, secretOrPrivateKey, (err, data) => {
-
         if (err) {
             return false
         }
         return true
     })
-
 }
 
 const tokenSet = () => {
@@ -23,8 +25,7 @@ const tokenSet = () => {
     return token = jwt.sign({
         name,
         id
-    }, signkey, { expiresIn: 60*60*100 });
-
+    }, signkey, { expiresIn: 60 * 60 * 100 });
 }
 
 
