@@ -8,7 +8,8 @@
  */
 
 function queryInfoHandle(queryMap,regexQueryKeyList, queryInfo) {
-	for (let i in queryInfo) {
+	for (let i in queryMap) {
+
 		if (queryMap[i] != null) {
 			//判断需要正则验证的 参数
 			if (regexQueryKeyList.includes(i)) {
