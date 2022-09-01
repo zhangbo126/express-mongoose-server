@@ -7,9 +7,8 @@ const bodyParser = require('body-parser')
 var expressJwt = require('express-jwt')
 let Token = require('./utils/tokenProving')
 let db = require('./db').userInfo
+let app = express();
 let rouerModle = require('./routes')
-
-var app = express();
 
 // app.use(expressJwt({
 //   secret: 'mes_qdhd_mobile_xhykjyxgs',
@@ -28,21 +27,17 @@ app.all('*', function (req, res, next) {
   res.header('Content-Type', 'application/json;charset=utf-8');
   next();
 });
+
+
 app.use(function (err, req, res, next) {
- 
-  if (err) {
-    return res.json({
-      code: 0,
-      message: '异常'
-    })
-  }
+
   let token = req.headers.authorization
   let isAuth = Token.tokenRange(token)
   if (token && isAuth) {
     //全局验证 当前 token 是否有效
     db.findOne({ token }).then(data => {
       if (!data) {
-        res.status(403)
+        res.status(403).jsonp({ message:'登录失效',code:403})
         res.render('error')
       } else {
         next()
@@ -77,6 +72,14 @@ app.use('/brand', rouerModle.goodsBrand);
 app.use('/information', rouerModle.information);
 app.use('/cart', rouerModle.cart);
 app.use('/order', rouerModle.order);
+
+//统一处理接口错误问题
+app.use((err,req,res,next)=>{
+    if(err){
+     return  res.status(500).jsonp({ message: err.message ,code:500})
+    }
+    next()
+})
 
 
 module.exports = app;
