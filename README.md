@@ -1,8 +1,8 @@
-n# Express+Vue3+AntDesign2
+# Express+Vue3+AntDesign3
 
 #### 介绍
 后端：node.js +mongoose +express
-前端：vue3+ant-design-vue2
+前端：vue3+ant-design-vue3
 
 #### 软件架构
 软件架构说明
