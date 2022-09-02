@@ -12,8 +12,20 @@ var uuid = require('node-uuid');
 //需要添加正则验证的参数
 const regexQueryKeyList = ["goodsName", "placeOrigin", "brandName", "categoryName", "goodsNo", "skuName"]
 
-//新增商品
-router.post('/addGoods', (req, res, next) => {
+/** 
+ * 新增商品
+ * @param {Array} mixList 规格项列表
+ * @param {Array} spaceValueList 规格值列表
+ * @param {String} categoryId 商品分类
+ * @param {String} brandId 商品品牌
+ * @param {String} goodsNo 商品编号
+ * @param {String} goodsName 商品名称
+ * @param {String} placeOrigin 价格
+ * @type {POST}
+ * @return {data} 
+*/
+
+router.post('/addGoods',async (req, res, next) => {
 
   try {
     const goodsId = uuid.v4().replace(/-/g, "")
@@ -28,80 +40,68 @@ router.post('/addGoods', (req, res, next) => {
     }
 
     let brandName, categoryName
-    //根据id找到对应的品牌 和分类 名称
-    dbBrand.findById({ _id: brandId }).then(data => {
-      brandName = data.name
-
-    }).then(() => {
-      dbClass.findById({ _id: categoryId }).then(data => {
-        categoryName = data.name
-
-      }).then(() => {
-        addFun()
-      })
+     //根据id找到对应的品牌 和分类 名称
+    let findBrand = await dbBrand.findById({ _id: brandId })
+    brandName = findBrand.name
+    let findClass =await dbClass.findById({ _id: categoryId })
+    categoryName = findClass.name
+    //组装数据
+    let goodsList = mixList.map(v => {
+      delete v.mixKey1
+      delete v.mixKey2
+      delete v.mixKey3
+      delete v.mixKey4
+      v.categoryId = categoryId
+      v.status = 1
+      v.brandName = brandName
+      v.categoryName = categoryName
+      v.brandId = brandId
+      v.goodsNo = goodsNo
+      v.goodsName = goodsName
+      v.placeOrigin = placeOrigin
+      v.designSketch = v.designSketch.map(d => d.url)
+      v.goodsId = goodsId
+      v.salesVolume = Math.floor(Math.random() * 100)
+      return v
     })
-
-    const addFun = () => {
-      let goodsList = mixList.map(v => {
-        delete v.mixKey1
-        delete v.mixKey2
-        delete v.mixKey3
-        delete v.mixKey4
-        v.categoryId = categoryId
-        v.status = 1
-        v.brandName = brandName
-        v.categoryName = categoryName
-        v.brandId = brandId
-        v.goodsNo = goodsNo
-        v.goodsName = goodsName
-        v.placeOrigin = placeOrigin
-        v.designSketch = v.designSketch.map(d => d.url)
-        v.goodsId = goodsId
-        v.salesVolume = Math.floor(Math.random() * 100)
-        return v
-      })
-
-      const goodsInfo = {
-        goodsName,
-        placeOrigin,
-        categoryName,
-        brandName,
-        categoryId,
-        brandId,
-        goodsNo,
-        goodsId,
-        spaceValueList
-      }
-
-      dbSpace.insertMany(goodsInfo, (err, data) => {
-        if (err) {
-          return res.jsonp({
-            code: 0,
-            message: '异常'
-          })
-        }
-        db.insertMany(goodsList, (err, data) => {
-          if (err) {
-            return res.jsonp({
-              code: 0,
-              message: '异常'
-            })
-          }
-          return res.jsonp({
-            code: 1,
-            message: '操作成功'
-          })
-        })
-      })
+    const goodsInfo = {
+      goodsName,
+      placeOrigin,
+      categoryName,
+      brandName,
+      categoryId,
+      brandId,
+      goodsNo,
+      goodsId,
+      spaceValueList
     }
+
+     //更新商品信息
+     await  dbSpace.insertMany(goodsInfo)
+     //更新商品规格列表
+     await  db.insertMany(goodsList)
+     return  res.jsonp({ code: 1, message: '操作成功' })  
   } catch {
     next({ message: '接口错误' })
   }
 })
 
+/** 
+ * 编辑
+ * @param {Array} mixList 规格项列表
+ * @param {Array} spaceValueList 规格值列表
+ * @param {String} categoryId 商品分类
+ * @param {String} brandId 商品品牌
+ * @param {String} goodsNo 商品编号
+ * @param {String} goodsName 商品名称
+ * @param {String} placeOrigin 价格
+ * @param {String} goodsId 商品ID
+ * @type {POST}
+ * @return {data} 
+*/
 
-//编辑商品
-router.post('/editGoods', (req, res, next) => {
+
+router.post('/editGoods',async (req, res, next) => {
   try {
     const { mixList, spaceValueList } = req.body
     const { categoryId, brandId, goodsNo, goodsName, goodsId, placeOrigin } = req.body.mixInfo
@@ -113,19 +113,12 @@ router.post('/editGoods', (req, res, next) => {
     }
 
     let brandName, categoryName
-    //根据id找到对应的品牌 和分类 名称
-    dbBrand.findById({ _id: brandId }).then(data => {
-      brandName = data.name
-    }).then(() => {
-      dbClass.findById({ _id: categoryId }).then(data => {
-        categoryName = data.name
-
-      }).then(() => {
-        editFun()
-      })
-    })
-    const editFun = () => {
-      let goodsList = mixList.map(v => {
+       //根据id找到对应的品牌 和分类 名称
+       let findBrand = await dbBrand.fnindById({ _id: brandId })
+       brandName = findBrand.name
+       let findClass = await dbClass.findById({ _id: categoryId })
+       categoryName = findClass.name
+       let goodsList = mixList.map(v => {
         delete v.mixKey1
         delete v.mixKey2
         delete v.mixKey3
@@ -155,64 +148,59 @@ router.post('/editGoods', (req, res, next) => {
         placeOrigin,
         spaceValueList
       }
+       //更新商品信息
+     await  dbSpace.insertMany(goodsInfo)
+     //删除 之前的商品规格
+     await db.deleteMany({ goodsId })
+     //更新商品规格列表
+     await db.insertMany(goodsList)
 
-      dbSpace.updateOne({ goodsId }, goodsInfo).then(data => {
-
-      }).then(() => {
-        db.deleteMany({ goodsId }, (err, data) => {
-          if (!err) {
-            db.insertMany(goodsList, (errs, data) => {
-              if (errs) {
-                return res.jsonp({
-                  code: 0,
-                  message: '异常'
-                })
-              }
-              return res.jsonp({
-                code: 1,
-                message: '操作成功'
-              })
-            })
-          }
-        })
-      })
-    }
+     return  res.jsonp({ code: 1, message: '操作成功' })  
+     
   } catch {
     next({ message: '接口错误' })
   }
 })
 
-
+/** 
+ * 编辑时获取当前商品信息
+ * @param {String} goodsId 价格
+ * @type {POST}
+ * @return {spaceInfo,mixList} 
+*/
 //编辑时获取当前商品信息
-router.post('/getEditGoodsInfo', (req, res, next) => {
+router.post('/getEditGoodsInfo',async (req, res, next) => {
   try {
     const { goodsId } = req.body
     let mixList = []
     let spaceInfo = {}
-    db.find({ goodsId }).then(data => {
-      mixList = data
-    }).then(() => {
-      dbSpace.findOne({ goodsId }).then(data => {
-        spaceInfo = data
-        return res.jsonp({
-          code: 1,
-          message: '操作成功',
-          data: {
-            spaceInfo,
-            mixList,
-          }
-        })
-      })
-    })
+    //找到商品信息
+    let findData = await db.find({ goodsId })
+    mixList = findData
+    //找到商品规格信息
+    let findSpaceData =  await  dbSpace.findOne({ goodsId })
+    spaceInfo=findSpaceData
+    let data ={spaceInfo, mixList}
+    res.jsonp({ code: 1,message: '操作成功',data })
   } catch {
     next({ message: '接口错误' })
   }
 })
 
 
-
-//获取商品列表
-router.post('/getGoodsList', (req, res, next) => {
+/** 
+ * 获取商品列表
+ * @param {String} goodsName 商品名称
+ * @param {String} brandName 品牌名称
+ * @param {String} categoryName 分类名称
+ * @param {String} skuName 规格名称
+ * @param {String} goodsNo 商品编号
+ * @param {Number} placeOrigin 价格
+ * @param {String} goodsType 商品分类
+ * @type {POST}
+ * @return {data} 
+*/
+router.post('/getGoodsList', async (req, res, next) => {
   try {
     const { pageSize, pageNumber, goodsName, brandName, categoryName, skuName, goodsNo, placeOrigin, goodsType } = req.body
     let queryInfo = {
@@ -220,25 +208,30 @@ router.post('/getGoodsList', (req, res, next) => {
     }
     const queryMap = { goodsName, categoryName, brandName, skuName, goodsNo, placeOrigin, goodsType }
     queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
-    db.find(queryInfo, (err, count) => {
-      db.find(queryInfo, { __v: 0 }, (err, data) => {
-        let resData = data
-        return res.jsonp({
-          code: 1,
-          data: resData,
-          count,
-          message: '操作成功'
-        })
-      }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
-    }).count(true)
+    //获取总页数
+    let count =  await  db.find(queryInfo).count(true)
+    //查询商品数据
+    let findData = await  db.find(queryInfo, { __v: 0 }).skip((pageNumber - 1) * 10).limit(pageSize).sort({ 'sort': 1 })
+    return  res.jsonp({
+       code: 1,
+       data: findData,
+       count,
+       message: '操作成功'
+    })
   } catch {
     next({ message: '接口错误' })
   }
 })
 
+/** 
+ * 设置商品详情
+ * @param {String} id 规格id
+ * @param {String} mixDetail 规格详情
+ * @type {POST}
+ * @return {data} 
+*/
 
-//设置商品详情
-router.post('/setGoodsDetails', (req, res, next) => {
+router.post('/setGoodsDetails', async (req, res, next) => {
   try {
     const { id, mixDetail } = req.body
     if (submitRule({ id, mixDetail })) {
@@ -259,7 +252,12 @@ router.post('/setGoodsDetails', (req, res, next) => {
   }
 })
 
-//获取商品详情
+/** 
+ * 获取商品详情
+ * @param {String} id 规格id
+ * @type {POST}
+ * @return {data} 
+*/
 router.post('/getGoodsDetails', (req, res, next) => {
   try {
     const { id } = req.body
@@ -285,7 +283,13 @@ router.post('/getGoodsDetails', (req, res, next) => {
   }
 })
 
-//小程序获取商品详情信息
+/** 
+ * 小程序获取商品详情信息
+ * @param {String} id 规格id
+ * @type {POST}
+ * @return {data} 
+*/
+
 router.post('/getGoodsDetailsInfo', (req, res, next) => {
   try {
     const { id } = req.body
@@ -308,9 +312,13 @@ router.post('/getGoodsDetailsInfo', (req, res, next) => {
   }
 })
 
-
-//小程序获取商品列表 类型  
-router.post('/getGoodsTypeList', (req, res, next) => {
+/** 
+ * 小程序获取商品列表 类型 
+ * @param {Number} goodsType 商品分类
+ * @type {POST}
+ * @return {data} 
+*/
+router.post('/getGoodsTypeList',async (req, res, next) => {
   try {
     const { goodsType, pageSize, pageNumber } = req.body
     let queryInfo = {
@@ -318,14 +326,12 @@ router.post('/getGoodsTypeList', (req, res, next) => {
     }
     const queryMap = { goodsType }
     queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
-    db.count({}, (err, count) => {
-      db.find(queryInfo, { __v: 0 }, (err, data) => {
-        return res.jsonp({
-          code: 1,
-          data,
-          message: '操作成功'
-        })
-      }).skip((pageNumber - 1) * 10).limit(pageSize)
+    let count =await  db.count({})
+    let findData =await db.find(queryInfo, { __v: 0 }).skip((pageNumber - 1) * 10).limit(pageSize)
+    return res.jsonp({
+      code: 1,
+      data:findData,
+      message: '操作成功'
     })
   } catch {
     next({ message: '接口错误' })

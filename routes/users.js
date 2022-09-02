@@ -12,104 +12,90 @@ let queryInfoHandle = require('../utils/queryInfoHandle')
 //需要添加正则验证的参数
 const regexQueryKeyList = ["userAccount", "phone", "email"]
 
-/*
-用户登录
-  POST
+/** 
+ * 用户登录
+ * @param {String} userAccount 账号
+ * @param {String} passWord 密码
+ * @type {POST}
+ * @return {data} 
 */
 
-router.post('/login', (req, res, next) => {
-  const { userAccount, passWord } = req.body
-  if (!userAccount || !passWord) {
-    return res.jsonp({
-      code: 0,
-      message: '操作异常'
-    })
-  }
-  const find = { $or: [{ userAccount }, { phone: userAccount }] }
-  db.findOne(find, ((err, data) => {
-
-    try {
-      if (data) {
-        if (data.status == 0) {
-          return res.jsonp({
-            code: 0,
-            message: '账号已停用'
-          })
-        }
-        if (data.passWord != md5Encry(passWord)) {
-          return res.jsonp({
-            code: 0,
-            message: '账号或密码不正确'
-          })
-        }
-        //登陆成功
+router.post('/login', async (req, res, next) => {
+    const { userAccount, passWord } = req.body
+    if (!userAccount || !passWord) {
+      return res.jsonp({
+        code: 0,
+        message: '操作异常'
+      })
+    }
+    const find = { $or: [{ userAccount }, { phone: userAccount }] }
+    try{
+      let findAccount = await db.findOne(find)
+      if(!findAccount){
+        return   res.jsonp({ code: 0,message: '账号不存在'})  
+      }
+      const { status } = findAccount
+      //判断账号状态
+      if (status == 0) {
+        return res.jsonp({ code: 0, message: '账号已停用' })
+      }
+      //检测密码是否正确
+       if (findAccount.passWord != md5Encry(passWord)) {
+          return res.jsonp({ code: 0, message: '账号或密码不正确' })           
+       }
+       //登陆成功
         let token = Token.tokenSet()
         const update = { $or: [{ userAccount }, { phone: userAccount }] }
-        db.updateOne(update, { token }, (err, userInfo) => {
-          data.token = token
-          return res.jsonp({
-            code: 1,
-            message: '登陆成功',
-            data,
-
-          })
-        })
-      } else {
-        res.jsonp({
-          code: 0,
-          message: '账号不存在'
-        })
-      }
-    } catch {
+        await db.updateOne(update, { token })
+        findAccount.token = token
+        return res.jsonp({code: 1, message: '登陆成功', data:findAccount})
+      
+    }catch{
       next({ message: '接口错误' })
     }
-  }))
+
 })
 
 
 
-/*获取用户信息*/
-
-router.post('/getuserInfo', (req, resp, next) => {
+/** 
+ * 获取登录用户信息
+ * @param {String} token 登录用户token
+ * @type {POST}
+ * @return {menuList, userInfo} 菜单列表，用户信息
+*/
+router.post('/getuserInfo', async (req, resp, next) => {
   const token = req.headers.authorization
   try {
     if (token) {
-      db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 }).then((userInfo) => {
-        if (userInfo) {
-          const userRole = userInfo.userRole
-          //查询当前用户拥有的角色
-          roleDb.find({ "_id": { $in: userRole } }).then((data) => {
-            if (data) {
-              let roleMenu = []
-              roleMenu = data.map(v => v.roleMenu_List).flat()
-
-              //找到对应的 菜单
-              menuDb.find({ $or: [{ "_id": { $in: roleMenu } }] }).then(menuList => {
-                if (menuList.length > 0) {
-                  //找到对应的父级菜单
-                  resp.jsonp({
-                    code: 1,
-                    data: {
-                      menuList,
-                      userInfo,
-                    },
-                    message: '操作成功'
-                  })
-                } else {
-                  resp.jsonp({
-                    code: -1,
-                    data: {
-                      menuList,
-                      userInfo,
-                    },
-                    message: '操作成功'
-                  })
-                }
-              })
-            }
+      // 查询当前用户信息
+      let userInfo = await db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 })
+      const userRole = userInfo.userRole
+      //查询当前用户拥有的角色
+      let findRoule = await roleDb.find({ "_id": { $in: userRole } })
+      if (findRoule) {
+        let roleMenu = []
+        //二维数组转换一维数组
+        roleMenu = findRoule.map(v => v.roleMenu_List).flat()
+        //找到对应的 菜单      
+        let menuList = await menuDb.find({ $or: [{ "_id": { $in: roleMenu } }] }).sort({ 'sort': 1 })
+        //返回前端数据
+        let data = { menuList, userInfo }
+        if (menuList.length > 0) {
+          //找到对应的父级菜单
+          resp.jsonp({
+            code: 1,
+            data,
+            message: '操作成功'
+          })
+        } else {
+          resp.jsonp({
+            code: -1,
+            data,
+            message: '操作成功'
           })
         }
-      })
+      }
     }
   } catch {
     next({ message: '接口错误' })
@@ -118,11 +104,15 @@ router.post('/getuserInfo', (req, resp, next) => {
 
 
 
-
-
-/*获取账号列表*/
-
-router.post('/getAccountList', (req, res, next) => {
+/** 获取账号列表
+ * @param {String} userAccount 用户账号
+ * @param {Number} phone 用户手机号
+ * @param {Number} status 账号状态
+ * @param {String} email 邮箱
+ * @type {POST}
+ * @return {data, count}
+*/
+router.post('/getAccountList', async (req, res, next) => {
   try {
     const { pageSize, pageNumber, userAccount, phone, status, email } = req.body
     let queryInfo = {
@@ -130,22 +120,13 @@ router.post('/getAccountList', (req, res, next) => {
     }
     const queryMap = { userAccount, status, phone, email }
     queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
-    db.count({}, (err, count) => {
-      db.find(queryInfo, { __v: 0 }, (err, data) => {
-        if (err) {
-          return res.jsonp({
-            code: 0,
-            message: '异常'
-          })
-        }
-
-        return res.jsonp({
-          code: 1,
-          data,
-          count: queryInfo.$or ? data.length : count,
-          message: '操作成功'
-        })
-      }).skip((pageNumber - 1) * 10).limit(pageSize)
+    let count = await db.count({})
+    let findData = await db.find(queryInfo, { __v: 0 }).skip((pageNumber - 1) * 10).limit(pageSize)
+    res.jsonp({
+      code: 1,
+      data: findData,
+      count: queryInfo.$or ? findData.length : count,
+      message: '操作成功'
     })
   } catch {
     next({ message: '接口错误' })
@@ -156,18 +137,18 @@ router.post('/getAccountList', (req, res, next) => {
 
 
 
-/*
+/**
 添加账号
-  POST
-  userAccount 账号名
-  phone 手机号
-  email 邮箱
+ * @param {String} userAccount 账号名
+ * @param {Number} phone 手机号
+ * @param {String} email 邮箱
+ * @type {POST}
+ * @return 
 */
-
-router.post('/addAccount', (req, res, next) => {
-
+router.post('/addAccount',async (req, res, next) => {
   try {
     const { userAccount, phone, email } = req.body
+    //初始添加信息
     let obj = {
       userAccount,
       passWord: '123456',
@@ -180,206 +161,146 @@ router.post('/addAccount', (req, res, next) => {
       status: 1,
     }
     if (submitRule({ userAccount, phone, email }) || reqRules({ userAccount, phone }, 40)) {
-      return res.jsonp({
-        code: 0,
-        message: '操作异常'
-      })
+      return res.jsonp({code: 0, message: '操作异常'})    
     }
-
+   //密码加密
     obj.passWord = md5Encry(obj.passWord)
     const find = { $or: [{ userAccount }, { phone }] }
-    db.findOne(find, (err, data) => {
-
-      if (err) {
-        return res.jsonp({
-          code: 0,
-          message: '异常'
-        })
-      }
-      if (data) {
-        return res.jsonp({
-          code: 0,
-          message: '账号已存在'
-        })
-      }
-
-      db.insertMany(obj, (err, data) => {
-        if (err) {
-          return res.jsonp({
-            code: 0,
-            message: '异常'
-          })
-        }
-        return res.jsonp({
-          code: 1,
-          message: '添加成功'
-        })
-      })
-
-    })
+    //查找账号
+    let findData =await db.findOne(find)
+    if(findData){
+      return res.jsonp({code: 0,message: '账户名称或联系方式已存在'})   
+    }
+    //新增账号
+    await db.insertMany(obj)
+    return res.jsonp({code: 1,message: '添加成功'})   
   } catch {
     next({ message: '接口错误' })
   }
 })
 
-/*
+/**
    删除账户
+ * @param {String} id 账号ID
+ * @type {POST}
+ * @return 
 */
 
-router.post('/delAccount', (req, res, next) => {
+router.post('/delAccount', async (req, res, next) => {
   try {
     const { id } = req.body
-    db.findByIdAndRemove({ _id: id }, (err) => {
-      if (err) {
-        return res.jsonp({
-          code: 0,
-          message: '操作异常'
-        })
-      }
-      return res.jsonp({
-        code: 1,
-        message: '操作成功'
-      })
-    })
+    await  db.findByIdAndRemove({ _id: id })
+    return res.jsonp({ code: 1,message: '操作成功' })
   } catch {
     next({ message: '接口错误' })
   }
 })
 
 
-/*
- 修改密码 原密码验证
+/** 
+ *  修改密码验证
+  * @param {String} token token
+  * @param {String} passWord 密码
+  * @type {POST}
+ * @return 
 */
-router.post('/editPasswordTesting', (req, res, next) => {
+router.post('/editPasswordTesting', async(req, res, next) => {
   try {
     const token = req.headers.authorization
+    //密码加密
     const passWord = md5Encry(req.body.passWord)
-    db.findOne({ token }).then(data => {
-      if (data && data.passWord == passWord) {
-        return res.jsonp({
-          code: 1,
-          message: '操作成功'
-        })
-      } else {
-        return res.jsonp({
-          code: 0,
-          message: '原密码不正确'
-        })
-      }
-    })
+    let findData = db.findOne({ token })
+    //判断原密码是否输入正确
+    if(findData && findData.passWord==passWord){
+       return res.jsonp({code: 1, message: '操作成功'})
+    }else{
+      return res.jsonp({code: 0, message: '原密码不正确'})
+    }
   } catch {
     next({ message: '接口错误' })
   }
 })
 
-/*
-修改密码
+/** 
+    修改密码
+  * @param {String} token token
+  * @param {String} passWord 密码
+  * @type {POST}
+ * @return 
 */
-router.post('/editPassword', (req, res, next) => {
+router.post('/editPassword',async (req, res, next) => {
   try {
     const token = req.headers.authorization
     const passWord = md5Encry(req.body.passWord)
     if (!req.body.passWord || req.body.passWord.length > 30) {
-      return res.jsonp({
-        code: 0,
-        message: '操作异常'
-      })
+         return res.jsonp({code: 0,message: '操作异常' })   
     }
-    db.updateOne({ token }, { passWord }, (err, data) => {
-      if (err) {
-        return res.jsonp({
-          code: 0,
-          message: '异常'
-        })
-      }
-      if (data) {
-        return res.jsonp({
-          code: 1,
-          message: '操作成功'
-        })
-      }
-      return res.jsonp({
-        code: 0,
-        message: '操作异常'
-      })
+    //修改密码
+    let updateData = await db.updateOne({ token },{ passWord })
+    if(updateData){
+      return res.jsonp({code: 1,message: '操作成功'})
+    }else{
+      res.jsonp({code: 0,message: '操作异常'}) 
+    }
 
-    })
   } catch {
     next({ message: '接口错误' })
   }
 })
 
 
-/*账号启用 / 禁用*/
+/** 
+账号启用 / 禁用
+  * @param {String} id 账号ID
+  * @param {String} status 状态
+  * @type {POST}
+  * @return 
+*/
 
-router.post('/accountStatusSet', (req, res, next) => {
+router.post('/accountStatusSet', async (req, res, next) => {
   try {
     const { id, status } = req.body
-    db.findOneAndUpdate({ _id: id }, { status }, (err, data) => {
-      if (!err) {
-        return res.jsonp({
-          code: 1,
-          message: '操作成功'
-        })
-      }
-      return res.jsonp({
-        code: 0,
-        message: '参数不完整'
-      })
-    })
+    await db.findOneAndUpdate({ _id: id }, { status })
+    res.jsonp({code: 1,message: '操作成功'})
   } catch {
     next({ message: '接口错误' })
   }
 })
 
-/*重置密码*/
 
-router.post('/resultPassWord', (req, res, next) => {
+/** 
+重置密码
+  * @param {String} id 账号ID
+  * @type {POST}
+  * @return 
+*/
+router.post('/resultPassWord',async (req, res, next) => {
   try {
     const { id } = req.body
     const passWord = md5Encry('zb123456')
-    db.findOneAndUpdate({ _id: id }, { passWord }, (err, data) => {
-      if (!err) {
-        return res.jsonp({
-          code: 1,
-          message: '操作成功'
-        })
-      }
-      return res.jsonp({
-        code: 0,
-        message: '参数不完整'
-      })
-    })
+    await db.findOneAndUpdate({ _id: id }, { passWord })
+    res.jsonp({code: 1,message: '操作成功'})
   } catch {
     next({ message: '接口错误' })
   }
 })
 
-/* 角色分配*/
-router.post('/roleAssignment', (req, res, next) => {
+/** 
+角色分配
+  * @param {String} id 账号ID
+  * @param {Array} userRole 角色ID
+  * @type {POST}
+  * @return 
+*/
+router.post('/roleAssignment', async(req, res, next) => {
   try {
     const { id, userRole } = req.body
-    roleDb.find({ "_id": { $in: userRole } }, (err, data) => {
-      if (err) {
-        return res.jsonp({
-          code: 0,
-          message: '异常'
-        })
-      }
-      const userRoleName = data.map(v => v.name)
-      db.findOneAndUpdate({ _id: id }, { userRole, userRoleName }, (err, data) => {
-        if (!err) {
-          return res.jsonp({
-            code: 1,
-            message: '操作成功'
-          })
-        }
-        return res.jsonp({
-          code: 0,
-          message: '异常'
-        })
-      })
-    })
+    //找到当前账号已有角色
+    let roleData = await  roleDb.find({ "_id": { $in: userRole } })
+    const userRoleName = roleData.map(v => v.name)
+    //更新当前账号角色
+    await db.findOneAndUpdate({ _id: id }, { userRole, userRoleName })
+    res.jsonp({code: 1, message: '操作成功'})
   } catch {
     next({ message: '接口错误' })
   }
@@ -387,7 +308,7 @@ router.post('/roleAssignment', (req, res, next) => {
 
 
 /*小程序用户注册*/
-router.post('/registerAccount', (req, res, next) => {
+router.post('/registerAccount', async (req, res, next) => {
   try {
     const { userAccount, phone, passWord } = req.body
     let obj = {
@@ -408,28 +329,13 @@ router.post('/registerAccount', (req, res, next) => {
         message: '操作异常'
       })
     }
-  
-    db.findOne({ $or: [{ userAccount, phone }] }).then(data => {
-      if (data) {
-        return res.jsonp({
-          code: 0,
-          message: '该账号已被注册'
-        })
-      }
-      db.insertMany(obj, (err, data) => {
-        if (err) {
-          return res.jsonp({
-            code: 0,
-            message: '异常'
-          })
-        }
-        return res.jsonp({
-          code: 1,
-          message: '添加成功'
-        })
-      })
 
-    })
+    let findData = await db.findOne({ $or: [{ userAccount, phone }] })
+    if (findData) {
+      return res.jsonp({ code: 0,message: '该账号已被注册' })  
+    }
+    await  db.insertMany(obj)
+    return res.jsonp({ code: 1,message: '添加成功' })  
   } catch {
     next({ message: '接口错误' })
   }
