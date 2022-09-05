@@ -9,15 +9,11 @@ let schema = mongoose.Schema({
     "sort": Number,
     "key": String,
     "parentId": String,
-    "children": Array
-
+    "children": Array,
+    "menuType":Number, //1目录 2菜单 3按钮
+        
 })
 
-
-
-//userInfoList 集合名称
+// 集合名称
 let menuInfo = mongoose.model('menuInfo', schema, 'menuList')
-
-
-
 module.exports = menuInfo

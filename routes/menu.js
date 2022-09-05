@@ -23,8 +23,8 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule
 
 router.post('/addMenu',async (req, res, next) => {
     try {
-        const { name, icon, component, url, redirectUrl, sort, key, parentId, children } = req.body
-        if (submitRule({ name, component, url, key })) {
+        const { name, icon, component, url, redirectUrl, sort, key, parentId, children ,menuType} = req.body
+        if (submitRule({ name, component, url, key }) && [1,2].includes(menuType)) {
             return res.jsonp({
                 code: 0,
                 message: '参数不完整'
@@ -37,7 +37,7 @@ router.post('/addMenu',async (req, res, next) => {
             })
         }
         const obj = {
-            name, status: 1, icon, component, url, redirectUrl, sort, key, parentId, children
+            name, status: 1, icon, component, url, redirectUrl, sort, key, parentId, children,menuType
         }
 
        let findData = await db.findOne({key})
@@ -70,8 +70,8 @@ router.post('/addMenu',async (req, res, next) => {
 */
 router.post('/editMenu',async (req, res, next) => {
     try {
-        const { name, status, icon, component, url, redirectUrl, sort, key, parentId, children, id } = req.body
-        if (submitRule({ name, component, url, key })) {
+        const { name, status, icon, component, url, redirectUrl, sort, key, parentId, children, id ,menuType} = req.body
+        if (submitRule({ name, component, url, key }) && [1,2].includes(menuType)) {
             return res.jsonp({ code: 0,message: '参数不完整'})         
         }
         if (reqRules({ name, component, url, redirectUrl, sort, key, id }, 40)) {
@@ -82,7 +82,8 @@ router.post('/editMenu',async (req, res, next) => {
             children: children || [],
             sort,
             key,
-            parentId, id
+            parentId, id,
+            menuType
         }
         //判断 菜单唯一标识 是否被占用
         let findData = await  db.findOne({key})

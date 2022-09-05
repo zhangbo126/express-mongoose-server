@@ -95,7 +95,7 @@ router.post('/editGetMenuTree', (req, res, next) => {
         db.findOne({ _id: id }, { _v: 0 }).then((data) => {
             if (data) {
 
-                dbMenu.find({}, { _v: 0 }).then((menu) => {
+                dbMenu.find({}, { _v: 0 }).sort({'sort':1}).then((menu) => {
                     const menuIdList = data.roleMenu_List.map(v => {
                         v.isChange = 0
                         return v
