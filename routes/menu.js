@@ -24,7 +24,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule
 router.post('/addMenu',async (req, res, next) => {
     try {
         const { name, icon, component, url, redirectUrl, sort, key, parentId, children ,menuType} = req.body
-        if (submitRule({ name, component, url, key }) && [1,2].includes(menuType)) {
+        if (submitRule({ name, component, url, key }) && [1].includes(menuType)) {
             return res.jsonp({
                 code: 0,
                 message: '参数不完整'

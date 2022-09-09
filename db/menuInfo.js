@@ -10,7 +10,7 @@ let schema = mongoose.Schema({
     "key": String,
     "parentId": String,
     "children": Array,
-    "menuType":Number, //1目录 2菜单 3按钮
+    "menuType":Number, //1菜单 2按钮
         
 })
 

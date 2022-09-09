@@ -78,9 +78,13 @@ router.post('/getuserInfo', async (req, resp, next) => {
         //二维数组转换一维数组
         roleMenu = findRoule.map(v => v.roleMenu_List).flat()
         //找到对应的 菜单      
-        let menuList = await menuDb.find({ $or: [{ "_id": { $in: roleMenu } }] }).sort({ 'sort': 1 })
-        //返回前端数据
-        let data = { menuList, userInfo }
+        let menu = await menuDb.find({ $or: [{ "_id": { $in: roleMenu } }]}).sort({ 'sort': 1 })
+        // 过滤出是菜单类型的
+        let menuList = menu.filter(v=>v.menuType==1)
+        //过滤出是按钮类型的
+        let btnAuthList =menu.filter(v=>v.menuType==2).map(v=>v.key)
+          //返回前端数据
+        let data = { menuList, userInfo,btnAuthList }
         if (menuList.length > 0) {
           //找到对应的父级菜单
           resp.jsonp({
