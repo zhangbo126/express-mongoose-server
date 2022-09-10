@@ -71,14 +71,14 @@ router.post('/addMenu',async (req, res, next) => {
 router.post('/editMenu',async (req, res, next) => {
     try {
         const { name, status, icon, component, url, redirectUrl, sort, key, parentId, children, id ,menuType} = req.body
-        if (submitRule({ name, component, url, key }) && [1,2].includes(menuType)) {
+        if (submitRule({ name, component, url, key }) && [1].includes(menuType)) {
             return res.jsonp({ code: 0,message: '参数不完整'})         
         }
         if (reqRules({ name, component, url, redirectUrl, sort, key, id }, 40)) {
             return res.jsonp({ code: 0, message: '异常'})          
         }
         const obj = {
-            name, status, icon, component, url, redirectUrl,
+            name, status:1, icon, component, url, redirectUrl,
             children: children || [],
             sort,
             key,

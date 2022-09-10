@@ -16,11 +16,11 @@ const regexQueryKeyList = ["name"]
  * @param {Array} roleMenu_List 菜单列表
  * @type {POST}
 */
-router.post('/addRole',async (req, res, next) => {
+router.post('/addRole', async (req, res, next) => {
     try {
         const { name, describe, roleMenu_List } = req.body
-        if (submitRule({ name, describe })){
-            return res.jsonp({  code: 0,message: '参数不完整'})     
+        if (submitRule({ name, describe })) {
+            return res.jsonp({ code: 0, message: '参数不完整' })
         }
         if (reqRules({ name, describe }, 40)) {
             return res.jsonp({
@@ -34,8 +34,8 @@ router.post('/addRole',async (req, res, next) => {
         let findMenu = await dbMenu.find({ "_id": { $in: roleMenu_List } })
         obj.roleMenuName_List = findMenu.map(v => v.name)
         //更新角色菜单
-        await  db.insertMany(obj)
-        return res.jsonp({code: 1,message: '操作成功'})
+        await db.insertMany(obj)
+        return res.jsonp({ code: 1, message: '操作成功' })
     } catch {
         next({ message: '接口错误' })
     }
@@ -59,7 +59,7 @@ router.post('/addGetMenuTree', (req, res, next) => {
                 data: tree,
                 message: '操作成功'
             })
-        })
+        }).sort({ 'sort': 1 })
 
         const listToTree = (list, tree, parentId) => {
             list.forEach(item => {
@@ -94,20 +94,18 @@ router.post('/editGetMenuTree', (req, res, next) => {
         //根据用户ID 找到 对应的菜单
         db.findOne({ _id: id }, { _v: 0 }).then((data) => {
             if (data) {
-
-                dbMenu.find({}, { _v: 0 }).sort({'sort':1}).then((menu) => {
-                    const menuIdList = data.roleMenu_List.map(v => {
-                        v.isChange = 0
-                        return v
-                    })
+                dbMenu.find({}, { _v: 0 }).sort({ 'sort': 1 }).then((menu) => {
+                    const menuIdList = data.roleMenu_List
                     let list = JSON.parse(JSON.stringify(menu))
-                    changeListTree(list, menuIdList)   // 根据ID 匹配已选择的 菜单 
-
-                    let tree = []
-                    listToTree(list, tree, null)
+                    let menuList = []
+                    listToTree(list, menuList, null)
+                    const resData = {
+                        menuList,
+                        selectMenuIdList: menuIdList
+                    }
                     return res.jsonp({
                         code: 1,
-                        data: tree,
+                        data:resData,
                         message: '操作成功'
                     })
                 })
@@ -135,11 +133,13 @@ router.post('/editGetMenuTree', (req, res, next) => {
 
         //判断已选中的 菜单
         const changeListTree = (menu, menuIdList) => {
-            //isChange 1 已选择  0 未选择
+
+            let changeRole = []
+            //找到当前角色已选择的菜单
             menu.forEach(v => {
                 menuIdList.forEach(id => {
                     if (v._id == id) {
-                        v.isChange = 1
+                        changeRole.push(v._id)
                     }
 
                 })
@@ -159,7 +159,7 @@ router.post('/editGetMenuTree', (req, res, next) => {
  * @type {POST}
 */
 
-router.post('/editRole',async (req, res, next) => {
+router.post('/editRole', async (req, res, next) => {
     try {
         const { name, describe, roleMenu_List, id } = req.body
         if (submitRule({ name, describe, id })) {
@@ -177,12 +177,12 @@ router.post('/editRole',async (req, res, next) => {
 
         const obj = { name, describe, roleMenu_List }
         //找到当前角色菜单
-        let menuList= await  dbMenu.find({ "_id": { $in: roleMenu_List } })
+        let menuList = await dbMenu.find({ "_id": { $in: roleMenu_List } })
         //数据处理
         obj.roleMenuName_List = menuList.map(v => v.name)
         //更新当前角色内容
-        await  db.findOneAndUpdate({ _id: id }, obj)
-        return res.jsonp({code: 1, message: '操作成功'})
+        await db.findOneAndUpdate({ _id: id }, obj)
+        return res.jsonp({ code: 1, message: '操作成功' })
     } catch {
         next({ message: '接口错误' })
     }
@@ -198,7 +198,7 @@ router.post('/removeRole', (req, res, next) => {
     try {
         const { id } = req.body
         db.findByIdAndRemove({ _id: id }, (err, data) => {
-           return res.jsonp({ code: 1, message: '操作成功'})                  
+            return res.jsonp({ code: 1, message: '操作成功' })
         })
     } catch {
         next({ message: '接口错误' })
@@ -246,7 +246,7 @@ router.post('/setStatus', (req, res, next) => {
  * @type {POST}
  * @return {data} 
 */
-router.post('/getRoleList',async (req, res, next) => {
+router.post('/getRoleList', async (req, res, next) => {
     try {
         const { pageSize, pageNumber, name, status } = req.body
         let queryInfo = {
@@ -254,7 +254,7 @@ router.post('/getRoleList',async (req, res, next) => {
         }
         const queryMap = { name, status }
         queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
-        let count =await  db.count({})
+        let count = await db.count({})
         let data = await db.find(queryInfo, { __v: 0, roleMenu_List: 0 }).skip((pageNumber - 1) * 10).limit(pageSize)
         return res.jsonp({
             code: 1,
