@@ -9,7 +9,6 @@ let brandInfoList = require('./goodsBrand')
 let informationInfo = require('./informationInfo')
 let cartInfo = require('./cartInfo')
 let orderInfo = require('./orderInfo')
-
 module.exports = {
 	userInfo,
 	roleInfo,

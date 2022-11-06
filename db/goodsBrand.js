@@ -8,5 +8,5 @@ let schema = mongoose.Schema({
 })
 
 //brandInfoList 集合名称
-let brandInfoList = mongoose.model('goodsBrnad', schema, 'goodsBrnadList')
-module.exports = brandInfoList
+let goodsBrandInfo = mongoose.model('goodsBrnad', schema, 'goodsBrnadList')
+module.exports = goodsBrandInfo
