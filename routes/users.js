@@ -230,7 +230,7 @@ router.post('/editPasswordTesting', async (req, res, next) => {
     const token = req.headers.authorization
     //密码加密
     const passWord = md5Encry(req.body.passWord)
-    let findData = db.findOne({ token })
+    let findData = await db.findOne({ token })
     //判断原密码是否输入正确
     if (findData && findData.passWord == passWord) {
       return res.jsonp({ code: 1, message: '操作成功' })
@@ -241,6 +241,8 @@ router.post('/editPasswordTesting', async (req, res, next) => {
     next({ message: '接口错误' })
   }
 })
+
+
 
 /** 
     修改密码
