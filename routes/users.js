@@ -172,7 +172,7 @@ router.post('/addAccount', async (req, res, next) => {
     //初始添加信息
     let obj = {
       userAccount,
-      passWord: '123456',
+      passWord: 'zb123456',
       createTime: silly.format(new Date(), 'YYYY-MM-DD HH:mm:ss'),
       userRole: [],
       userRoleName: [],
