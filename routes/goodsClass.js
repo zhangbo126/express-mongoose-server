@@ -233,7 +233,7 @@ router.post('/getClassTypeList',async (req, res, next) => {
          let findData =  await db.find({ partentId: categoryId })
          //分类id组
          const categoryIds = findData.map(v => v._id)  
-         let goodsData = await db.find({ "categoryId": { $in: categoryIds } }).sort({ price, salesVolume })
+         let goodsData = await dbGoods.find({ "categoryId": { $in: categoryIds } }).sort({ price, salesVolume })
          let data  = goodsData
          //处理数据格式
          data.forEach(v => {

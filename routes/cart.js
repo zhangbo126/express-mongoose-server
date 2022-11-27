@@ -80,7 +80,7 @@ router.post('/getCartList',async (req, res, next) => {
         if (submitRule({ userId })) {
             return res.jsonp({ code: 0,message: '参数不完整' })          
         }
-        let data  =  db.find({ userId })
+        let data  = await db.find({ userId })
         data.forEach(v => {
             v.designSketch = v.designSketch.map(url => {
                 return url = replaceImgUrl(url)

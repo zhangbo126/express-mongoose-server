@@ -110,7 +110,7 @@ router.post('/getOrderList',async (req, res, next) => {
         const { pageSize, pageNumber, status, userId } = req.body
         let obj = { status,userId }     
         obj.status ? '' : delete obj.status
-        let data =db.find(obj, { __v: 0 }).skip((pageNumber - 1) * 10).limit(pageSize)
+        let data = await db.find(obj, { __v: 0 }).skip((pageNumber - 1) * 10).limit(pageSize)
         //数据格式处理
         data.forEach(v => {
             v.designSketch = v.designSketch.map(url => {

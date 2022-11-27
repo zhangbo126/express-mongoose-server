@@ -5,10 +5,7 @@ let schema = mongoose.Schema({
     "status": Number,
     "partentId": String,
     "partentName":String,
-    "sort":Number,
-   
-    
-    
+    "sort":Number,   
 })
 
 //goodsInfoClass 集合名称
