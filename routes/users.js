@@ -70,6 +70,7 @@ router.post('/getuserInfo', async (req, resp, next) => {
     if (token) {
       // 查询当前用户信息
       let userInfo = await db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 })
+
       const userRole = userInfo.userRole
       //查询当前用户拥有的角色
       let findRoule = await roleDb.find({ "_id": { $in: userRole } })
