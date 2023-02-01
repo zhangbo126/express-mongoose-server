@@ -5,11 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require('body-parser')
 var expressJwt = require('express-jwt')
-let Token = require('./utils/tokenProving')
 let db = require('./db').userInfo
 let app = express();
-let rouerModle = require('./routes')
-
+let utils = require('./utils/index')  //初始化方法
 // app.use(expressJwt({
 //   secret: 'mes_qdhd_mobile_xhykjyxgs',
 //   algorithms: ['HS256']
@@ -18,7 +16,6 @@ let rouerModle = require('./routes')
 // }))
 
 // error  handler   //token验证 全局拦截
-
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', '*');
@@ -32,12 +29,12 @@ app.all('*', function (req, res, next) {
 app.use(function (err, req, res, next) {
 
   let token = req.headers.authorization
-  let isAuth = Token.tokenRange(token)
+  let isAuth = utils.tokenRange(token)
   if (token && isAuth) {
     //全局验证 当前 token 是否有效
     db.findOne({ token }).then(data => {
       if (!data) {
-        res.status(403).jsonp({ message:'登录失效',code:403})
+        res.status(403).jsonp({ message: '登录失效', code: 403 })
         res.render('error')
       } else {
         next()
@@ -62,23 +59,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, '.')));
-app.use('/users', rouerModle.users);
-app.use('/menu', rouerModle.menu);
-app.use('/role', rouerModle.role);
-app.use('/goods', rouerModle.goods);
-app.use('/class', rouerModle.goodsClass);
-app.use('/upload', rouerModle.upload);
-app.use('/brand', rouerModle.goodsBrand);
-app.use('/information', rouerModle.information);
-app.use('/cart', rouerModle.cart);
-app.use('/order', rouerModle.order);
+utils.webScoket(app) //webscoket 初始化注册方法
+utils.routesApiInit(app) //路由API 初始化注册方法
 
 //统一处理接口错误问题
-app.use((err,req,res,next)=>{
-    if(err){
-     return  res.status(500).jsonp({ message: err.message ,code:500})
-    }
-    next()
+app.use((err, req, res, next) => {
+  if (err) {
+    return res.status(500).jsonp({ message: err.message, code: 500 })
+  }
+  next()
 })
 
 
