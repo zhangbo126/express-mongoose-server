@@ -7,13 +7,14 @@ const bodyParser = require('body-parser')
 var expressJwt = require('express-jwt')
 let db = require('./db').userInfo
 let app = express();
-let utils = require('./utils/index')  //初始化方法
+let utils = require('./utils/init')  //初始化方法
 // app.use(expressJwt({
 //   secret: 'mes_qdhd_mobile_xhykjyxgs',
 //   algorithms: ['HS256']
 // }).unless({
 //   path: ['/users/login', '/']
 // }))
+
 
 // error  handler   //token验证 全局拦截
 app.all('*', function (req, res, next) {
@@ -59,8 +60,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, '.')));
-utils.webScoket(app) //webscoket 初始化注册方法
-utils.routesApiInit(app) //路由API 初始化注册方法
+
+//路由API 初始化注册方法
+utils.routesApiInit(app) 
+//创建scoket连接 初始化
+utils.webScoket.scoketAddEvelistenr()
 
 //统一处理接口错误问题
 app.use((err, req, res, next) => {

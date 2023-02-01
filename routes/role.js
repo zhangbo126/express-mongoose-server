@@ -7,8 +7,7 @@ let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 
 let queryInfoHandle = require('../utils/queryInfoHandle')
 //需要添加正则验证的参数
 const regexQueryKeyList = ["name"]
-
-
+let webScoket = require('../utils/webScoket') //scoket方法
 /** 
  * 新增角色
  * @param {String} describe 角色描述
@@ -247,6 +246,7 @@ router.post('/setStatus', (req, res, next) => {
  * @return {data} 
 */
 router.post('/getRoleList', async (req, res, next) => {
+    webScoket.onSend('客户端调用了获取列表接口')
     try {
         const { pageSize, pageNumber, name, status } = req.body
         let queryInfo = {
