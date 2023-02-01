@@ -58,6 +58,7 @@ let ws = new WebScoket()  //声明一个新实列
 
 const scoketAddEvelistenr = () => {
 	ws.createServer({ port: 8080 })
+	
 }
 
 module.exports = {
