@@ -5,6 +5,7 @@ let dbMenu = require('../db').menuInfo
 let reqRules = require('../utils/reqDataRule').reqMultipleRule   //请求内容长度验证
 let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 验证
 let queryInfoHandle = require('../utils/queryInfoHandle')
+
 //需要添加正则验证的参数
 const regexQueryKeyList = ["name"]
 let webScoket = require('../utils/webScoket') //scoket方法
@@ -246,12 +247,12 @@ router.post('/setStatus', (req, res, next) => {
  * @return {data} 
 */
 router.post('/getRoleList', async (req, res, next) => {
-    webScoket.onSend('客户端调用了获取列表接口')
     try {
         const { pageSize, pageNumber, name, status } = req.body
         let queryInfo = {
             $or: []
         }
+        webScoket.onSend('123131231')
         const queryMap = { name, status }
         queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
         let count = await db.count({})

@@ -1,7 +1,5 @@
 /** 
  * WebScoket  初始化连接
- * @function scoketAddEvelistenr  scoket 监听连接初始化方法
- * @function WebScoket  scoket类封装 
  * @function onClone  客户端连接断开 
 **/
 /**
@@ -10,60 +8,59 @@
 **/
 /**
  * @function onMessage  scoket 客户端消息接收 
- * @param  {String} messaege 接收到的消息
+ * @param  {String} message 接收到的消息
  */
 /**
   * @function onSend  scoket  向客户端发送消息 
-  * @param  {String} messaege  发送给客户端的消息
+  * @param  {String} message  发送给客户端的消息
 */
-const webScoket = require('ws')
+const Scoket = require('ws')
+// 当前scoket对象
+let scoket = {}
+//当前scoket连接信息
+let ws = {}
 
-class WebScoket {
-	constructor() {
-		// 当前scoket对象
-		this.scoket = {}
-		// 当前scoket连接信息
-		this.ws = {}
-	}
-	createServer(options) {
-		this.scoket = new webScoket.Server(options);
-		this.scoket.on('connection', (ws, req) => this.onConnection(ws, req))
-	}
-	onConnection(ws, req) {
-		console.log('建立连接', req.url);
-		this.ws = ws
-		ws.send(JSON.stringify({ data: '建立连接' }));
-		ws.on('message', (msg) => this.onMessage(msg));
-		ws.on('close', (msg) => this.onClone(msg));
-	}
+const createServer = () => {
+	scoket = new Scoket.Server({ port: 8080 });
+	scoket.on('connection', (ws, req) => onConnection(ws, req))
+}
 
-	onMessage(message) {
-		this.scoket.clients.forEach((client) => {
-			if (client.readyState === webScoket.OPEN) {
-				this.ws.send(" -> " + message)
+const onConnection = (wss, req) => {
+	console.log('建立连接', req.url);
+	ws = wss
+	ws.send(JSON.stringify({ data: '建立连接' }));
+	ws.on('close', (msg) => onClone(msg));
+	ws.on('error', (err) => onError(err))
+}
+
+const onMessage = (callback) => {
+	ws.on('message', (message) => {
+		scoket.clients.forEach((client) => {
+			if (client.readyState === Scoket.OPEN) {
+				console.log('收到消息', message)
+				ws.send(" -> " + message)
+				callback(message)
 			}
 		})
-	}
-	onClone(message) {
-		console.log('关闭连接');
-	}
-   
-	onSend(messaege) {
-       console.log(this.ws)
-		this.ws.send(messaege)
-		
-	}
+	});
 }
-let ws = new WebScoket()  //声明一个新实列
 
-const scoketAddEvelistenr = () => {
-	ws.createServer({ port: 8080 })
-	
+const onClone = () => {
+
+}
+const onError = () => {
+
+}
+
+const onSend = (message) => {
+	ws.send(message)
 }
 
 module.exports = {
-	scoketAddEvelistenr,
-	onSend: ws.onSend,
-	onMessage: ws.onMessage,
-	onClone: ws.onSend,
+	createServer,
+	onSend,
+	onMessage,
+	onClone,
+	onError
+
 }

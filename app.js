@@ -64,7 +64,9 @@ app.use(express.static(path.join(__dirname, '.')));
 //路由API 初始化注册方法
 utils.routesApiInit(app) 
 //创建scoket连接 初始化
-utils.webScoket.scoketAddEvelistenr()
+utils.webScoket.createServer()
+
+
 
 //统一处理接口错误问题
 app.use((err, req, res, next) => {
