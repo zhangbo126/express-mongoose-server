@@ -28,17 +28,25 @@ const createServer = () => {
 const onConnection = (wss, req) => {
 	console.log('建立连接', req.url);
 	ws = wss
-	ws.send(JSON.stringify({ data: '建立连接' }));
-	ws.on('close', (msg) => onClone(msg));
-	ws.on('error', (err) => onError(err))
-}
-
-const onMessage = (callback) => {
+	ws.send(JSON.stringify({ data: '建立连接'}));
 	ws.on('message', (message) => {
 		scoket.clients.forEach((client) => {
 			if (client.readyState === Scoket.OPEN) {
 				console.log('收到消息', message)
 				ws.send(" -> " + message)
+			}
+		})
+	});
+	ws.on('close', (msg) => onClone(msg));
+	ws.on('error', (err) => onError(err))
+}
+
+const onMessage = (callback) => {
+	console.log(callback)
+	ws.on('message', (message) => {
+		scoket.clients.forEach((client) => {
+			if (client.readyState === Scoket.OPEN) {
+				console.log('收到消息callback', message)
 				callback(message)
 			}
 		})
@@ -48,8 +56,11 @@ const onMessage = (callback) => {
 const onClone = () => {
 
 }
-const onError = () => {
 
+const onError = (callback) => {
+	ws.on('error', (err) => {
+		callback(err)
+	})
 }
 
 const onSend = (message) => {
@@ -62,5 +73,4 @@ module.exports = {
 	onMessage,
 	onClone,
 	onError
-
 }

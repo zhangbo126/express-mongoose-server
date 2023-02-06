@@ -5,10 +5,12 @@ let dbMenu = require('../db').menuInfo
 let reqRules = require('../utils/reqDataRule').reqMultipleRule   //请求内容长度验证
 let submitRule = require('../utils/reqDataRule').reqSubmitRule  // 必填参数 验证
 let queryInfoHandle = require('../utils/queryInfoHandle')
+let webScoket = require('../utils/webScoket') //scoket方法
 
 //需要添加正则验证的参数
 const regexQueryKeyList = ["name"]
-let webScoket = require('../utils/webScoket') //scoket方法
+
+
 /** 
  * 新增角色
  * @param {String} describe 角色描述
