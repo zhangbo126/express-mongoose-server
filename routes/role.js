@@ -254,7 +254,6 @@ router.post('/getRoleList', async (req, res, next) => {
         let queryInfo = {
             $or: []
         }
-        webScoket.onSend('123131231')
         const queryMap = { name, status }
         queryInfoHandle(queryMap, regexQueryKeyList, queryInfo)
         let count = await db.count({})
