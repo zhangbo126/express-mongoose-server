@@ -17,7 +17,7 @@
 ##### 4.![输入图片说明](https://images.gitee.com/uploads/images/2021/0716/111807_c2945dc1_5452088.png "屏幕截图.png")
 
 ##### 5. 数据导入:建议使用dbData下js文件js脚本导入或者sq文件下sq导入（json格式导入数据格式会改变）
-##### 6. 已Navicat为列 找到要导入的数据库右击选择 “运行脚本文件” 选择对应的文件 如下图：
+##### 6. 以Navicat为例找到要导入的数据库右击选择 “运行脚本文件” 选择对应的文件 如下图：
 ![输入图片说明](public/image/image_5.png)
 ![输入图片说明](public/image/image_6.png)
 
