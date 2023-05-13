@@ -7,22 +7,25 @@ db.getCollection("roleInfoList").insert( {
         "6311b8d78144d48d8cb28e62",
         "6145ebd75368494d3486bc30",
         "6145ebba5368494d3486bc2f",
-        "617389e0f41b145cec73f28c",
-        "61738a3df41b145cec73f28d",
         "6145ebfb5368494d3486bc31",
         "631c8a224359f0b79c70ec49",
         "631c8a3e4359f0b79c70ec4a",
         "6145eb8a5368494d3486bc2e",
-        "6145e8355368494d3486bc2a",
         "631c89a94359f0b79c70ec47",
         "631b5e3e65222d1d9968a34f",
-        "631ca8f0c8ff0820550cb626",
         "631c82c673dad3196526a525",
+        "631c89cb4359f0b79c70ec48",
+        "617389e0f41b145cec73f28c",
+        "61738a3df41b145cec73f28d",
+        "631ca8f0c8ff0820550cb626",
+        "6145e85f5368494d3486bc2b",
         "631c8aa04359f0b79c70ec4b",
         "6145e7935368494d3486bc29",
+        "645716a9a33cc696c80f5c87",
+        "6457172fa33cc696c80f5c88",
+        "6145e8355368494d3486bc2a",
         "6145e6e85368494d3486bc28",
-        "6145e85f5368494d3486bc2b",
-        "631c89cb4359f0b79c70ec48"
+        "6457185ea33cc696c80f5c89"
     ],
     "roleMenuName_List": [
         "用户中心",
@@ -43,7 +46,10 @@ db.getCollection("roleInfoList").insert( {
         "新增商品",
         "商品编辑",
         "角色删除",
-        "删除账号"
+        "删除账号",
+        "测试",
+        "/Home/Home",
+        "热带雨林"
     ],
     status: NumberInt("1")
 } );
@@ -77,11 +83,17 @@ db.getCollection("roleInfoList").insert( {
     name: "测试",
     "roleMenu_List": [
         "617389e0f41b145cec73f28c",
-        "61738a3df41b145cec73f28d"
+        "61738a3df41b145cec73f28d",
+        "6145ebfb5368494d3486bc31",
+        "631c8a224359f0b79c70ec49",
+        "631c8a3e4359f0b79c70ec4a"
     ],
     "roleMenuName_List": [
+        "商品库",
         "消息中心",
-        "活动通知"
+        "活动通知",
+        "新增商品",
+        "商品编辑"
     ],
     status: NumberInt("1")
 } );

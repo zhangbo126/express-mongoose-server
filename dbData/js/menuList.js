@@ -17,37 +17,37 @@ db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6145e7935368494d3486bc29"),
     children: [ ],
-    component: "userRole",
-    icon: null,
+    component: "/userCenter/userRole",
+    icon: "AimOutlined",
     key: "P_User_Role",
     menuType: NumberInt("1"),
     name: "用户角色",
     parentId: "6145e6e85368494d3486bc28",
     redirectUrl: null,
     sort: NumberInt("1"),
-    status: null,
+    status: NumberInt("1"),
     url: "/usercenter/userrole"
 } );
 db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6145e8355368494d3486bc2a"),
     children: [ ],
-    component: "menuList",
-    icon: null,
+    component: "/userCenter/menuList",
+    icon: "AppstoreOutlined",
     key: "P_Menu_List",
     menuType: NumberInt("1"),
     name: "菜单管理",
     parentId: "6145e6e85368494d3486bc28",
     redirectUrl: null,
     sort: NumberInt("2"),
-    status: null,
+    status: NumberInt("1"),
     url: "/usercenter/menulist"
 } );
 db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6145e85f5368494d3486bc2b"),
     children: [ ],
-    component: "userAccount",
+    component: "/userCenter/userAccount",
     icon: null,
     key: "P_Account_Manage",
     menuType: NumberInt("1"),
@@ -77,7 +77,7 @@ db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6145ebba5368494d3486bc2f"),
     children: [ ],
-    component: "commodityBrand",
+    component: "/commodityCenter/commodityBrand",
     icon: null,
     key: "P_Commodity_Brand",
     menuType: NumberInt("1"),
@@ -85,14 +85,14 @@ db.getCollection("menuList").insert( {
     parentId: "6145eb8a5368494d3486bc2e",
     redirectUrl: null,
     sort: NumberInt("2"),
-    status: null,
-    url: "/commoditycenter/commoditycenter"
+    status: NumberInt("1"),
+    url: "/commoditycenter/commoditybrand"
 } );
 db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6145ebd75368494d3486bc30"),
     children: [ ],
-    component: "commodityClass",
+    component: "/commodityCenter/commodityClass",
     icon: null,
     key: "P_Commodity_class",
     menuType: NumberInt("1"),
@@ -107,7 +107,7 @@ db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6145ebfb5368494d3486bc31"),
     children: [ ],
-    component: "commodityLibrary",
+    component: "/commodityCenter/commodityLibrary",
     icon: null,
     key: "P_Commodity_Libray",
     menuType: NumberInt("1"),
@@ -137,7 +137,7 @@ db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("61738a3df41b145cec73f28d"),
     children: [ ],
-    component: "informationList",
+    component: "/informationCenter/informationList",
     icon: null,
     key: "P_Information_List",
     menuType: NumberInt("1"),
@@ -152,7 +152,7 @@ db.getCollection("menuList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("6311b8d78144d48d8cb28e62"),
     children: [ ],
-    component: "Home",
+    component: "/Home/Home",
     icon: "HomeOutlined",
     key: "P_Home_Page",
     menuType: NumberInt("1"),
@@ -160,7 +160,7 @@ db.getCollection("menuList").insert( {
     parentId: null,
     redirectUrl: null,
     sort: NumberInt("1"),
-    status: null,
+    status: NumberInt("1"),
     url: "/home/page"
 } );
 db.getCollection("menuList").insert( {
@@ -282,4 +282,34 @@ db.getCollection("menuList").insert( {
     sort: NumberInt("2"),
     status: NumberInt("1"),
     url: null
+} );
+db.getCollection("menuList").insert( {
+    __v: NumberInt("0"),
+    _id: ObjectId("645716a9a33cc696c80f5c87"),
+    children: [ ],
+    component: "/Home/Home",
+    icon: "AppleOutlined",
+    key: "deom_1",
+    menuType: NumberInt("1"),
+    name: "另一个首页菜单",
+    parentId: "6457172fa33cc696c80f5c88",
+    redirectUrl: null,
+    sort: null,
+    status: NumberInt("1"),
+    url: "/deom"
+} );
+db.getCollection("menuList").insert( {
+    __v: NumberInt("0"),
+    _id: ObjectId("6457172fa33cc696c80f5c88"),
+    children: [ ],
+    component: "RouteView",
+    icon: null,
+    key: "async_router_deom",
+    menuType: NumberInt("1"),
+    name: "动态路由测试",
+    parentId: null,
+    redirectUrl: null,
+    sort: NumberInt("9"),
+    status: NumberInt("1"),
+    url: "/deom3"
 } );

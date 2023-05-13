@@ -81,12 +81,12 @@ db.getCollection("goodsClassList").insert( {
 db.getCollection("goodsClassList").insert( {
     __v: NumberInt("0"),
     _id: ObjectId("61a2467d2ee28a1f3c79931d"),
-    logoFilePath: "http://localhost:99/upload/2021/11/27/202111272253_6964.469340510748.jpg",
+    logoFilePath: "http://localhost:99/upload/2023/05/07/202305072212_3672.5576750859877.jpg",
     name: "同仁堂养生茶",
     partentId: "61a246632ee28a1f3c79931c",
     partentName: null,
     sort: null,
-    status: NumberInt("0")
+    status: NumberInt("1")
 } );
 db.getCollection("goodsClassList").insert( {
     __v: NumberInt("0"),

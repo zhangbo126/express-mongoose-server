@@ -12,6 +12,7 @@ db.getCollection("orderList").insert( {
     goodsName: "乐品乐花果茶\t",
     goodsNo: "LPL-002",
     goodsType: NumberInt("1"),
+    mixDetail: null,
     num: NumberInt("1"),
     placeOrigin: "山东",
     price: NumberInt("235"),
@@ -37,6 +38,7 @@ db.getCollection("orderList").insert( {
     goodsName: "同仁堂养生茶",
     goodsNo: "TRT-001",
     goodsType: NumberInt("1"),
+    mixDetail: null,
     num: NumberInt("1"),
     placeOrigin: "南京",
     price: NumberInt("642"),
@@ -66,6 +68,7 @@ db.getCollection("orderList").insert( {
     goodsName: "忆江南花果茶",
     goodsNo: "YJN-002",
     goodsType: NumberInt("1"),
+    mixDetail: null,
     num: NumberInt("2"),
     placeOrigin: "宣化",
     price: NumberInt("234"),
@@ -76,4 +79,31 @@ db.getCollection("orderList").insert( {
     status: NumberInt("1"),
     userId: "619a467d36568547d078b7a2",
     weight: NumberInt("52")
+} );
+db.getCollection("orderList").insert( {
+    __v: NumberInt("0"),
+    _id: ObjectId("63830ee09a096eb48075d3c2"),
+    brandId: "61a2366c1b10f1139d84e507",
+    brandName: null,
+    categoryId: "61a23b711b10f1139d84e511",
+    categoryName: "俊旅-红茶",
+    createTime: "2022-11-27 15:16:48",
+    designSketch: [
+        "http://localhost:99/upload/2021/11/27/202111272246_1899.9655640387437.jpg",
+        "http://localhost:99/upload/2021/11/27/202111272247_2508.800516233203.jpg"
+    ],
+    goodsName: "福茗源秒杀系列",
+    goodsNo: "FMY-001",
+    goodsType: NumberInt("2"),
+    mixDetail: "<p><img src=\"http://localhost:99/upload/2021/11/27/1464607350240448512.jpg\" title=\"\" alt=\"99f5fb1fcf0c2458.jpg\"/></p>",
+    num: NumberInt("3"),
+    placeOrigin: "江苏",
+    price: NumberInt("5324"),
+    salesVolume: NumberInt("51"),
+    skuName: "福茗源-粗茶（打折）\t）",
+    specValue1: "秒杀",
+    specValue2: "打折",
+    status: NumberInt("2"),
+    userId: "6145ea5b5368494d3486bc2d",
+    weight: NumberInt("2342")
 } );

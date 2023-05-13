@@ -6,17 +6,13 @@ db.getCollection("userInfoList").insert( {
     passWord: "03adf148360d42274c42decb95b43661",
     phone: "15958665541",
     status: NumberInt("1"),
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi6KqrIiwiaWQiOiJscGhvcHgyMWxxbzAwMDAwIiwiaWF0IjoxNjYyNzM1NzczLCJleHAiOjE2NjMwOTU3NzN9.cERRX7VYACxY2_8gO3pH3DTZ7qrCJjRQwpqB1o0k0qU",
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi6LSyIiwiaWQiOiJyNWdmczBxZWF0YzAwMDAwIiwiaWF0IjoxNjgzNDYyNjYzLCJleHAiOjE2ODM4MjI2NjN9.PpimSxBIp9Vb192jEdDFKw58f877tWvmXqju8lf2-Wc",
     userAccount: "admin",
     userRole: [
-        "6145e95f5368494d3486bc2c",
-        "6145ee775368494d3486bc32",
-        "6153dac18603ce66ac84aea0"
+        "6145e95f5368494d3486bc2c"
     ],
     userRoleName: [
-        "超级管理员",
-        "商品中心管理员",
-        "测试"
+        "超级管理员"
     ],
     userType: null
 } );
@@ -48,8 +44,14 @@ db.getCollection("userInfoList").insert( {
     status: NumberInt("1"),
     token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi6aW8IiwiaWQiOiJoeHp3OTA2ZGg4MDAwMDAwIiwiaWF0IjoxNjM2Mjg3NjIzLCJleHAiOjE2MzY2NDc2MjN9.cWCt2bf6WsVCOj22utkjDHkBwL42B0Ow9Bn6uRChvzs",
     userAccount: "123",
-    userRole: [ ],
-    userRoleName: [ ],
+    userRole: [
+        "631c95c67b986b0a1d3ada50",
+        "6153dac18603ce66ac84aea0"
+    ],
+    userRoleName: [
+        "测试",
+        "用户中心管理员"
+    ],
     userType: NumberInt("2")
 } );
 db.getCollection("userInfoList").insert( {
@@ -71,13 +73,17 @@ db.getCollection("userInfoList").insert( {
     _id: ObjectId("61892e7953a376a70c90e323"),
     createTime: "2021-11-08 22:04:41",
     email: null,
-    passWord: "25d55ad283aa400af464c76d713c07ad",
+    passWord: "03adf148360d42274c42decb95b43661",
     phone: "15982328805",
     status: NumberInt("1"),
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi5rC9IiwiaWQiOiJpdXVxc3J6dWR4YzAwMDAwIiwiaWF0IjoxNjM2MzgwMzYwLCJleHAiOjE2MzY3NDAzNjB9.BVB-M3hhQX25p9_nfdl6ic-iccm8OlXI3pQPmAPiRxI",
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi5q6rIiwiaWQiOiJmZDZzOGRqODJhbzAwMDAwIiwiaWF0IjoxNjcyMzA3NjIxLCJleHAiOjE2NzI2Njc2MjF9.N7Spyxwt5pkeemHZzsIEhkKIXKlRnYC659XzFUm9GO0",
     userAccount: "zhanghao1",
-    userRole: [ ],
-    userRoleName: [ ],
+    userRole: [
+        "6153dac18603ce66ac84aea0"
+    ],
+    userRoleName: [
+        "测试"
+    ],
     userType: NumberInt("2")
 } );
 db.getCollection("userInfoList").insert( {
@@ -87,8 +93,8 @@ db.getCollection("userInfoList").insert( {
     email: "1259558183@qq.com",
     passWord: "e10adc3949ba59abbe56e057f20f883e",
     phone: "15982228807",
-    status: NumberInt("1"),
-    token: null,
+    status: null,
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi5puFIiwiaWQiOiIxMHBia2Y4YnUzb2cwMDAwMCIsImlhdCI6MTY2OTUzNTQxMiwiZXhwIjoxNjY5ODk1NDEyfQ.4ZJmEKReZgUUW5X8DK32dUKEwEZAKn9e1RajEWbY4yk",
     userAccount: "zhangbo",
     userRole: [
         "6145ee775368494d3486bc32"
