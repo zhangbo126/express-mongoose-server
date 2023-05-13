@@ -157,6 +157,7 @@ router.post('/getMenuTree', async (req, res, next) => {
         const { pageSize, pageNumber } = req.body
         db.find({}, { __v: 0 }, (err, data) => {
             const menu = data
+            console.log()
             //树型结构数据处理
             const tree = []
             listToTree(menu, tree, null)
