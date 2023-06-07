@@ -14,7 +14,10 @@ let schema = mongoose.Schema({
     "phone": String ,
     "email":String,
     "status":Number,
-    "userType":Number  //用户类型 1 管理端  2 小程序
+    "userType":Number,  //用户类型 1 管理端  2 小程序
+    "openId":String, //小程序登录openId
+    "sessionKey":String,
+    "avatarUrl":String, //用户头像
 })
 
 

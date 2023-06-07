@@ -1,5 +1,6 @@
 let express = require('express');
 let router = express.Router();
+let axios = require('axios')
 let silly = require('silly-datetime');
 let db = require('../db').userInfo
 let roleDb = require('../db').roleInfo  //角色表
@@ -57,6 +58,40 @@ router.post('/login', async (req, res, next) => {
 })
 
 
+/** 
+   @description 微信登录
+  * @param {String} code 
+  * @type {POST}
+  * @return 
+*/
+router.post('/wxLogin', async (req, res, next) => {
+  try {
+    const { code, avatarUrl, userName } = req.body
+    let token = Token.tokenSet()
+    const appId = 'wx66dee29d470c6095'
+    const appSecret = '79ee1240fa1ee8f67066d67fa7692e21';
+    const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`
+    //调用微信登录接口
+    const { data: { openid, session_key } } = await axios({ url, method: 'get' })
+    const updateInfo = await db.findOneAndUpdate({ openId: openid }, { $set: { sessionKey: session_key, token,avatarUrl,userName } })
+    if (updateInfo) {
+      const userInfo = await db.findOne({openId: openid})
+      return res.jsonp({ code: 1, message: '登录成功', data: userInfo})
+    } else {
+      //如果当前用户没有登录则插入一条新的用户信息
+      const insertInfo = { openId: openid, sessionKey: session_key, userType: 2, status: 1, token, userName,avatarUrl }
+      const userInfo = await db.findOne({openId: openid})
+      await db.insertMany(insertInfo)
+      return res.jsonp({ code: 1, message: '登录成功', data: userInfo})
+    }
+
+  } catch {
+    next({ message: '接口错误' })
+
+  }
+
+})
+
 
 /** 
  * 获取登录用户信息
@@ -69,7 +104,7 @@ router.post('/getuserInfo', async (req, resp, next) => {
   try {
     if (token) {
       // 查询当前用户信息
-      let userInfo = await db.findOne({ token }, { userRoleName: 0, token: 0, passWord: 0, _id: 0 })
+      let userInfo = await db.findOne({ token }, { userRoleName: 0, passWord: 0 })
 
       const userRole = userInfo.userRole
       //查询当前用户拥有的角色
@@ -84,7 +119,7 @@ router.post('/getuserInfo', async (req, resp, next) => {
         const partentIdList = menu.filter(v => v.parentId).map(v => v.parentId)
         let menuPartent = await menuDb.find({ $or: [{ "_id": { $in: partentIdList } }] }).sort({ 'sort': 1 })
         // 过滤出是菜单类型的数据
-        let menuList = menu.filter(v => v.menuType == 1).concat(menuPartent.filter(v=>v.menuType==1))
+        let menuList = menu.filter(v => v.menuType == 1).concat(menuPartent.filter(v => v.menuType == 1))
         //过滤出是按钮类型的数据
         let btnAuthList = menu.filter(v => v.menuType == 2).map(v => v.key)
         const duplicateArrRemoval = (arr, key) => {
@@ -101,20 +136,25 @@ router.post('/getuserInfo', async (req, resp, next) => {
 
         //返回前端数据
         let data = { menuList, userInfo, btnAuthList }
-        if (menuList.length > 0) {
-          //找到对应的父级菜单
-          resp.jsonp({
+           resp.jsonp({
             code: 1,
             data,
             message: '操作成功'
           })
-        } else {
-          resp.jsonp({
-            code: -1,
-            data,
-            message: '操作成功'
-          })
-        }
+        // if (menuList.length > 0) {
+        //   //找到对应的父级菜单
+        //   resp.jsonp({
+        //     code: 1,
+        //     data,
+        //     message: '操作成功'
+        //   })
+        // } else {
+        //   resp.jsonp({
+        //     code: 1,
+        //     data,
+        //     message: '操作成功'
+        //   })
+        // }
       }
     }
   } catch {
@@ -364,6 +404,7 @@ router.post('/registerAccount', async (req, res, next) => {
     next({ message: '接口错误' })
   }
 })
+
 
 
 
